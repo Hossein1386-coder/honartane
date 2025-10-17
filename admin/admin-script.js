@@ -1,0 +1,845 @@
+// Admin Panel JavaScript
+
+// Configuration
+const ADMIN_PASSWORD = "admin123"; // تغییر این رمز عبور را فراموش نکنید
+const PRODUCTS_STORAGE_KEY = "honartaneh_products";
+const ADMIN_SESSION_KEY = "admin_session";
+
+// DOM Elements
+const loginScreen = document.getElementById('loginScreen');
+const adminDashboard = document.getElementById('adminDashboard');
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+const logoutBtn = document.getElementById('logoutBtn');
+const addProductBtn = document.getElementById('addProductBtn');
+const addProductBtnAlt = document.getElementById('addProductBtnAlt');
+const productsList = document.getElementById('productsList');
+const productModal = document.getElementById('productModal');
+const deleteModal = document.getElementById('deleteModal');
+const productForm = document.getElementById('productForm');
+const modalTitle = document.getElementById('modalTitle');
+const closeModal = document.getElementById('closeModal');
+const closeDeleteModal = document.getElementById('closeDeleteModal');
+const cancelBtn = document.getElementById('cancelBtn');
+const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+// Navigation Elements
+const navLinks = document.querySelectorAll('.nav-link');
+const contentSections = document.querySelectorAll('.content-section');
+
+// Quick Actions
+const quickAddProduct = document.getElementById('quickAddProduct');
+const quickSettings = document.getElementById('quickSettings');
+
+// Settings Elements
+const contactForm = document.getElementById('contactForm');
+const aboutForm = document.getElementById('aboutForm');
+const settingsPhone = document.getElementById('settingsPhone');
+const settingsInstagram = document.getElementById('settingsInstagram');
+const about1 = document.getElementById('about1');
+const about2 = document.getElementById('about2');
+const about3 = document.getElementById('about3');
+const about4 = document.getElementById('about4');
+const resetContactBtn = document.getElementById('resetContactBtn');
+const resetAboutBtn = document.getElementById('resetAboutBtn');
+
+// Backup Elements
+const exportAllBtn = document.getElementById('exportAllBtn');
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+const exportProductsBtn = document.getElementById('exportProductsBtn');
+
+// Image Upload Elements
+const productImageFile = document.getElementById('productImageFile');
+const imageUploadArea = document.getElementById('imageUploadArea');
+const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg = document.getElementById('previewImg');
+const removeImage = document.getElementById('removeImage');
+const productImage = document.getElementById('productImage');
+
+// State
+let currentProductId = null;
+let products = [];
+let deleteProductId = null;
+let siteSettings = null;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Show loading screen
+    const loadingScreen = document.getElementById('loadingScreen');
+    
+    // Simulate loading time
+    setTimeout(() => {
+        // Load data first to avoid empty UI after refresh
+        loadProducts();
+        loadSettings();
+        checkAdminSession();
+        setupEventListeners();
+        
+        // Hide loading screen
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 300);
+    }, 1500); // 1.5 second loading time
+});
+
+// Check if admin is already logged in
+function checkAdminSession() {
+    const session = localStorage.getItem(ADMIN_SESSION_KEY);
+    if (session === 'true') {
+        showDashboard();
+    } else {
+        showLogin();
+    }
+}
+
+// Show login screen
+function showLogin() {
+    loginScreen.classList.remove('hidden');
+    adminDashboard.classList.add('hidden');
+}
+
+// Show admin dashboard
+function showDashboard() {
+    // Ensure products are loaded before rendering
+    if (!products || products.length === 0) {
+        loadProducts();
+    }
+    loginScreen.classList.add('hidden');
+    adminDashboard.classList.add('hidden');
+    setTimeout(() => {
+        adminDashboard.classList.remove('hidden');
+    }, 100);
+    updateStats();
+    renderProducts();
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Login form
+    loginForm.addEventListener('submit', handleLogin);
+    
+    // Logout
+    logoutBtn.addEventListener('click', handleLogout);
+    
+    // Navigation
+    setupNavigation();
+    
+    // Add product buttons
+    if (addProductBtn) addProductBtn.addEventListener('click', () => openProductModal());
+    if (addProductBtnAlt) addProductBtnAlt.addEventListener('click', () => openProductModal());
+    
+    // Quick actions
+    if (quickAddProduct) quickAddProduct.addEventListener('click', () => {
+        showSection('add-product');
+        openProductModal();
+    });
+    if (quickSettings) quickSettings.addEventListener('click', () => showSection('site-settings'));
+    
+    // Modal controls
+    closeModal.addEventListener('click', closeProductModal);
+    closeDeleteModal.addEventListener('click', closeDeleteModalFunc);
+    cancelBtn.addEventListener('click', closeProductModal);
+    cancelDeleteBtn.addEventListener('click', closeDeleteModalFunc);
+    
+    // Product form
+    productForm.addEventListener('submit', handleProductSubmit);
+    
+    // Delete confirmation
+    confirmDeleteBtn.addEventListener('click', handleDeleteConfirm);
+    
+    // Image upload events
+    setupImageUpload();
+
+    // Settings forms
+    if (contactForm) {
+        contactForm.addEventListener('submit', handleContactSubmit);
+        resetContactBtn.addEventListener('click', resetContactToDefault);
+    }
+    
+    if (aboutForm) {
+        aboutForm.addEventListener('submit', handleAboutSubmit);
+        resetAboutBtn.addEventListener('click', resetAboutToDefault);
+    }
+    
+    // Backup functionality
+    if (exportAllBtn) exportAllBtn.addEventListener('click', exportAllData);
+    if (exportProductsBtn) exportProductsBtn.addEventListener('click', exportProducts);
+    if (importBtn) importBtn.addEventListener('click', () => importFile.click());
+    if (importFile) importFile.addEventListener('change', importAllData);
+    
+    // Close modals on outside click
+    productModal.addEventListener('click', (e) => {
+        if (e.target === productModal) closeProductModal();
+    });
+    
+    deleteModal.addEventListener('click', (e) => {
+        if (e.target === deleteModal) closeDeleteModalFunc();
+    });
+}
+
+// Navigation Functions
+function setupNavigation() {
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.getAttribute('data-section');
+            showSection(section);
+        });
+    });
+}
+
+function showSection(sectionName) {
+    // Hide all sections
+    contentSections.forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Remove active class from all nav links
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Show target section
+    const targetSection = document.getElementById(`${sectionName}-section`);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+    
+    // Add active class to corresponding nav link
+    const targetLink = document.querySelector(`[data-section="${sectionName}"]`);
+    if (targetLink) {
+        targetLink.classList.add('active');
+    }
+    
+    // Update page title
+    updatePageTitle(sectionName);
+}
+
+function updatePageTitle(sectionName) {
+    const titles = {
+        'dashboard': 'نمای کلی',
+        'products': 'مدیریت محصولات',
+        'add-product': 'افزودن محصول',
+        'site-settings': 'تنظیمات سایت',
+        'contact-info': 'اطلاعات تماس',
+        'about-us': 'درباره ما',
+        'backup': 'پشتیبان‌گیری',
+        'help': 'راهنما'
+    };
+    
+    const title = titles[sectionName] || 'پنل مدیریت';
+    document.title = `${title} - هنر تنه`;
+}
+
+// SETTINGS: Keys and defaults
+const SETTINGS_STORAGE_KEY = 'honartaneh_settings_v1';
+const defaultSettings = {
+    phone: '989217907398',
+    instagram: 'woodview_atilier',
+    about: [
+        'در هنرتنه، ما باور داریم هر تکه چوب، روحی از دل طبیعت در خود دارد.',
+        'ما با عشق، دقت و مهارت، این روح را به زندگی برمی‌گردانیم و آن را به اثری دست‌ساز و منحصربه‌فرد تبدیل می‌کنیم.',
+        'بیشتر کارهای ما سفارشی و اختصاصی هستند — یعنی دقیقاً همان چیزی را می‌سازیم که شما در ذهن دارید.',
+        'از انتخاب طرح و نوع چوب گرفته تا جزئیات نهایی، هر مرحله با عشق و سلیقه‌ی شما همراه است.'
+    ]
+};
+
+function loadSettings() {
+    try {
+        const raw = localStorage.getItem(SETTINGS_STORAGE_KEY) || sessionStorage.getItem(SETTINGS_STORAGE_KEY);
+        siteSettings = raw ? JSON.parse(raw) : defaultSettings;
+    } catch {
+        siteSettings = defaultSettings;
+    }
+    // Prefill forms
+    if (siteSettings) {
+        if (settingsPhone) settingsPhone.value = siteSettings.phone || '';
+        if (settingsInstagram) settingsInstagram.value = siteSettings.instagram || '';
+        if (about1) about1.value = siteSettings.about?.[0] || '';
+        if (about2) about2.value = siteSettings.about?.[1] || '';
+        if (about3) about3.value = siteSettings.about?.[2] || '';
+        if (about4) about4.value = siteSettings.about?.[3] || '';
+    }
+}
+
+function saveSettings() {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(siteSettings));
+    sessionStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(siteSettings));
+}
+
+function handleContactSubmit(e) {
+    e.preventDefault();
+    siteSettings = {
+        ...siteSettings,
+        phone: (settingsPhone.value || '').trim(),
+        instagram: (settingsInstagram.value || '').trim()
+    };
+    saveSettings();
+    showNotification('اطلاعات تماس با موفقیت ذخیره شد ✅', 'success');
+}
+
+function handleAboutSubmit(e) {
+    e.preventDefault();
+    siteSettings = {
+        ...siteSettings,
+        about: [
+            (about1.value || '').trim(),
+            (about2.value || '').trim(),
+            (about3.value || '').trim(),
+            (about4.value || '').trim()
+        ]
+    };
+    saveSettings();
+    showNotification('متن‌های درباره ما با موفقیت ذخیره شد ✅', 'success');
+}
+
+function resetContactToDefault() {
+    siteSettings = {
+        ...siteSettings,
+        phone: defaultSettings.phone,
+        instagram: defaultSettings.instagram
+    };
+    saveSettings();
+    loadSettings();
+    showNotification('اطلاعات تماس به حالت پیش‌فرض بازنشانی شد', 'info');
+}
+
+function resetAboutToDefault() {
+    siteSettings = {
+        ...siteSettings,
+        about: [...defaultSettings.about]
+    };
+    saveSettings();
+    loadSettings();
+    showNotification('متن‌های درباره ما به حالت پیش‌فرض بازنشانی شد', 'info');
+}
+
+// Handle login
+function handleLogin(e) {
+    e.preventDefault();
+    const password = document.getElementById('password').value;
+    
+    if (password === ADMIN_PASSWORD) {
+        localStorage.setItem(ADMIN_SESSION_KEY, 'true');
+        showDashboard();
+        loginError.classList.add('hidden');
+        document.getElementById('password').value = '';
+    } else {
+        loginError.classList.remove('hidden');
+        document.getElementById('password').value = '';
+    }
+}
+
+// Handle logout
+function handleLogout() {
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+    showLogin();
+}
+
+// Load products from localStorage with fallback to sessionStorage
+function loadProducts() {
+    let stored = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    
+    // If not found in localStorage, try sessionStorage
+    if (!stored) {
+        stored = sessionStorage.getItem(PRODUCTS_STORAGE_KEY);
+    }
+    
+    if (stored) {
+        try {
+            products = JSON.parse(stored);
+        } catch (error) {
+            console.error('Error parsing products data:', error);
+            products = getDefaultProducts();
+            saveProducts();
+        }
+    } else {
+        // Initialize with default products if none exist
+        products = getDefaultProducts();
+        saveProducts();
+    }
+}
+
+// Get default products
+function getDefaultProducts() {
+    return [
+        {
+            id: 1,
+            title: "میز چوبی",
+            description: "طراحی مینیمال با چوب گردو طبیعی",
+            price: "تماس بگیرید",
+            image: "images/55.jpg",
+            active: true
+        },
+        {
+            id: 2,
+            title: "استند چوبی موبایل",
+            description: "ساخته شده با دقت، مقاوم و زیبا",
+            price: "تماس بگیرید",
+            image: "images/2.jpg",
+            active: true
+        },
+        {
+            id: 3,
+            title: "برد مزه",
+            description: "سادگی و کارایی در یک طراحی",
+            price: "تماس بگیرید",
+            image: "images/3.jpg",
+            active: true
+        },
+        {
+            id: 4,
+            title: "ساعت چوبی",
+            description: "تراش داده شده با دست، برای دکور",
+            price: "تماس بگیرید",
+            image: "images/58.jpg",
+            active: true
+        },
+        {
+            id: 5,
+            title: "برد مزه با چوب سنجد",
+            description: "طراحی مدرن با چوب راش",
+            price: "تماس بگیرید",
+            image: "images/5.jpg",
+            active: true
+        },
+        {
+            id: 6,
+            title: "میز گیمینگ با چوب سنجد",
+            description: "مجموعه کامل با پرداخت طبیعی",
+            price: "تماس بگیرید",
+            image: "images/table.jpg",
+            active: true
+        }
+    ];
+}
+
+// Save products to localStorage
+function saveProducts() {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+    // Also save to main site's localStorage for immediate sync
+    localStorage.setItem('products', JSON.stringify(products));
+    
+    // Save to sessionStorage as backup
+    sessionStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+}
+
+// Update statistics
+function updateStats() {
+    const totalProducts = products.length;
+    const activeProducts = products.filter(p => p.active).length;
+    const inactiveProducts = totalProducts - activeProducts;
+    
+    document.getElementById('totalProducts').textContent = totalProducts;
+    document.getElementById('activeProducts').textContent = activeProducts;
+    if (document.getElementById('inactiveProducts')) {
+        document.getElementById('inactiveProducts').textContent = inactiveProducts;
+    }
+}
+
+// Backup Functions
+function exportAllData() {
+    const allData = {
+        products: products,
+        settings: siteSettings,
+        exportDate: new Date().toISOString(),
+        version: '1.0'
+    };
+    
+    const dataStr = JSON.stringify(allData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `honartaneh-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    showNotification('پشتیبان کامل با موفقیت دانلود شد!', 'success');
+}
+
+function importAllData(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                
+                if (importedData.products && Array.isArray(importedData.products)) {
+                    products = importedData.products;
+                    saveProducts();
+                }
+                
+                if (importedData.settings) {
+                    siteSettings = importedData.settings;
+                    saveSettings();
+                    loadSettings();
+                }
+                
+                updateStats();
+                renderProducts();
+                showNotification('داده‌ها با موفقیت بازیابی شدند!', 'success');
+            } catch (error) {
+                showNotification('خطا در خواندن فایل پشتیبان!', 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
+// Render products list
+function renderProducts() {
+    if (products.length === 0) {
+        productsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <h3>هیچ محصولی وجود ندارد</h3>
+                <p>برای شروع، اولین محصول خود را اضافه کنید.</p>
+                <button class="btn btn-primary" onclick="openProductModal()">
+                    افزودن محصول جدید
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    productsList.innerHTML = products.map(product => `
+        <div class="product-item">
+            <img src="${product.image}" alt="${product.title}" class="product-image" 
+                 onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjhGOUZBIi8+CjxwYXRoIGQ9Ik00MCAyMEMzMC4wNTg5IDIwIDIyIDI4LjA1ODkgMjIgMzhDMjIgNDcuOTQxMSAzMC4wNTg5IDU2IDQwIDU2QzQ5Ljk0MTEgNTYgNTggNDcuOTQxMSA1OCAzOEM1OCAyOC4wNTg5IDQ5Ljk0MTEgMjAgNDAgMjBaIiBmaWxsPSIjRTVFNUU1Ii8+CjxwYXRoIGQ9Ik0yOCAzOEwyOCA2MEg1MlYzOEgyOFoiIGZpbGw9IiNFNUU1RTUiLz4KPC9zdmc+Cg=='"
+                 loading="lazy">
+            <div class="product-info">
+                <h3 class="product-title">${product.title}</h3>
+                <p class="product-description">${product.description}</p>
+                <div class="product-meta">
+                    <span>قیمت: ${product.price}</span>
+                    <span class="status-badge ${product.active ? 'status-active' : 'status-inactive'}">
+                        ${product.active ? 'فعال' : 'غیرفعال'}
+                    </span>
+                </div>
+            </div>
+            <div class="product-actions">
+                <button class="btn btn-secondary" onclick="editProduct(${product.id})">
+                    ویرایش
+                </button>
+                <button class="btn btn-danger" onclick="deleteProduct(${product.id})">
+                    حذف
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+
+// Edit product
+function editProduct(productId) {
+    openProductModal(productId);
+}
+
+// Delete product
+function deleteProduct(productId) {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+        deleteProductId = productId;
+        document.getElementById('deleteProductName').textContent = product.title;
+        deleteModal.classList.remove('hidden');
+    }
+}
+
+// Close delete modal
+function closeDeleteModalFunc() {
+    deleteModal.classList.add('hidden');
+    deleteProductId = null;
+}
+
+// Handle delete confirmation
+function handleDeleteConfirm() {
+    if (deleteProductId) {
+        products = products.filter(p => p.id !== deleteProductId);
+        saveProducts();
+        updateStats();
+        renderProducts();
+        closeDeleteModalFunc();
+        
+        // Show success message
+        showNotification('محصول با موفقیت حذف شد!', 'success');
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Style the notification
+    Object.assign(notification.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        padding: '1rem 1.5rem',
+        borderRadius: '8px',
+        color: 'white',
+        fontWeight: '500',
+        zIndex: '10000',
+        transform: 'translateX(100%)',
+        transition: 'transform 0.3s ease'
+    });
+    
+    // Set background color based on type
+    const colors = {
+        success: '#28a745',
+        error: '#dc3545',
+        info: '#17a2b8',
+        warning: '#ffc107'
+    };
+    notification.style.backgroundColor = colors[type] || colors.info;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Export products data (for backup)
+function exportProducts() {
+    const dataStr = JSON.stringify(products, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'products-backup.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+// Import products data (for restore)
+function importProducts(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedProducts = JSON.parse(e.target.result);
+                if (Array.isArray(importedProducts)) {
+                    products = importedProducts;
+                    saveProducts();
+                    updateStats();
+                    renderProducts();
+                    showNotification('محصولات با موفقیت بازیابی شدند!', 'success');
+                } else {
+                    showNotification('فرمت فایل نامعتبر است!', 'error');
+                }
+            } catch (error) {
+                showNotification('خطا در خواندن فایل!', 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
+// Image Upload Functions
+function setupImageUpload() {
+    // Click to select file
+    imageUploadArea.addEventListener('click', () => {
+        productImageFile.click();
+    });
+    
+    // File input change
+    productImageFile.addEventListener('change', handleImageSelect);
+    
+    // Drag and drop
+    imageUploadArea.addEventListener('dragover', handleDragOver);
+    imageUploadArea.addEventListener('dragleave', handleDragLeave);
+    imageUploadArea.addEventListener('drop', handleDrop);
+    
+    // Remove image
+    removeImage.addEventListener('click', removeSelectedImage);
+}
+
+function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        processImageFile(file);
+    }
+}
+
+function handleDragOver(event) {
+    event.preventDefault();
+    imageUploadArea.classList.add('dragover');
+}
+
+function handleDragLeave(event) {
+    event.preventDefault();
+    imageUploadArea.classList.remove('dragover');
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    imageUploadArea.classList.remove('dragover');
+    
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+        processImageFile(files[0]);
+    }
+}
+
+function processImageFile(file) {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showNotification('لطفاً فقط فایل‌های تصویری انتخاب کنید!', 'error');
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('حجم فایل نباید بیشتر از 5 مگابایت باشد!', 'error');
+        return;
+    }
+    
+    // Show loading
+    imageUploadArea.classList.add('loading');
+    
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64 = e.target.result;
+        showImagePreview(base64);
+        productImage.value = base64; // Store base64 as image data
+        imageUploadArea.classList.remove('loading');
+    };
+    reader.onerror = function() {
+        showNotification('خطا در خواندن فایل!', 'error');
+        imageUploadArea.classList.remove('loading');
+    };
+    reader.readAsDataURL(file);
+}
+
+function showImagePreview(base64) {
+    previewImg.src = base64;
+    uploadPlaceholder.style.display = 'none';
+    imagePreview.style.display = 'block';
+}
+
+function removeSelectedImage() {
+    productImageFile.value = '';
+    productImage.value = '';
+    uploadPlaceholder.style.display = 'block';
+    imagePreview.style.display = 'none';
+}
+
+// Enhanced product form handling
+function handleProductSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(productForm);
+    const productData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        price: formData.get('price'),
+        image: formData.get('image'), // This will be base64 or existing image path
+        active: formData.get('active') === 'true'
+    };
+    
+    // If no new image selected and editing existing product, keep existing image
+    if (currentProductId && !productData.image) {
+        const existingProduct = products.find(p => p.id === currentProductId);
+        if (existingProduct) {
+            productData.image = existingProduct.image;
+        }
+    }
+    
+    if (currentProductId) {
+        // Edit existing product
+        const productIndex = products.findIndex(p => p.id === currentProductId);
+        if (productIndex !== -1) {
+            products[productIndex] = { ...products[productIndex], ...productData };
+        }
+    } else {
+        // Add new product
+        const newId = Math.max(...products.map(p => p.id), 0) + 1;
+        products.push({
+            id: newId,
+            ...productData
+        });
+    }
+    
+    saveProducts();
+    updateStats();
+    renderProducts();
+    closeProductModal();
+    
+    // Show success message
+    showNotification('محصول با موفقیت ذخیره شد!', 'success');
+}
+
+// Enhanced modal opening
+function openProductModal(productId = null) {
+    currentProductId = productId;
+    
+    if (productId) {
+        const product = products.find(p => p.id === productId);
+        if (product) {
+            modalTitle.textContent = 'ویرایش محصول';
+            document.getElementById('productId').value = product.id;
+            document.getElementById('productTitle').value = product.title;
+            document.getElementById('productDescription').value = product.description;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productActive').value = product.active.toString();
+            
+            // Handle existing image
+            if (product.image) {
+                if (product.image.startsWith('data:') || product.image.startsWith('blob:')) {
+                    // Base64 or blob image
+                    showImagePreview(product.image);
+                    productImage.value = product.image;
+                } else {
+                    // External image path
+                    showImagePreview(product.image);
+                    productImage.value = product.image;
+                }
+            } else {
+                removeSelectedImage();
+            }
+        }
+    } else {
+        modalTitle.textContent = 'افزودن محصول جدید';
+        productForm.reset();
+        document.getElementById('productId').value = '';
+        removeSelectedImage();
+    }
+    
+    productModal.classList.remove('hidden');
+}
+
+// Enhanced modal closing
+function closeProductModal() {
+    productModal.classList.add('hidden');
+    productForm.reset();
+    removeSelectedImage();
+    currentProductId = null;
+}
+
+// Make functions globally available
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.openProductModal = openProductModal;

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحه پیدا نشد - هنر تنه</title>
+    <meta name="description" content="صفحه مورد نظر شما پیدا نشد. به صفحه اصلی هنر تنه برگردید.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        .error-content h1 {
+            font-size: 4rem;
+            color: #171717;
+            margin-bottom: 1rem;
+        }
+        .error-content h2 {
+            font-size: 1.5rem;
+            color: #525252;
+            margin-bottom: 2rem;
+        }
+        .error-content p {
+            color: #737373;
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-container">
+            <div class="loading-logo">
+                <div class="logo-icon">🪵</div>
+                <h1 class="logo-title">هنر تنه</h1>
+            </div>
+            <div class="loading-text">
+                <p>در حال بررسی صفحه...</p>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-quote">
+                <p>"هر تکه چوب، روحی از دل طبیعت در خود دارد"</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-page">
+        <div class="error-content">
+            <h1>۴۰۴</h1>
+            <h2>صفحه پیدا نشد</h2>
+            <p>متأسفانه صفحه مورد نظر شما وجود ندارد یا حذف شده است.</p>
+            <a href="/" class="btn btn-primary">بازگشت به صفحه اصلی</a>
+        </div>
+    </div>
+
+    <script>
+        // Show loading screen briefly
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            
+            setTimeout(() => {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }, 1000); // 1 second loading time
+        });
+    </script>
+</body>
+</html>

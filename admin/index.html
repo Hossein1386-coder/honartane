@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت - هنر تنه</title>
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-container">
+            <div class="loading-logo">
+                <div class="logo-icon">🪵</div>
+                <h1 class="logo-title">هنر تنه</h1>
+            </div>
+            <div class="loading-text">
+                <p>در حال بارگذاری پنل مدیریت...</p>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-quote">
+                <p>"هر تکه چوب، روحی از دل طبیعت در خود دارد"</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">
+                    <div class="logo-icon">🪵</div>
+                    <h1>هنر تنه</h1>
+                </div>
+                <p class="login-subtitle">پنل مدیریت</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="password">رمز عبور:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">ورود</button>
+            </form>
+            
+            <div id="loginError" class="error-message hidden">
+                رمز عبور اشتباه است!
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="admin-dashboard hidden">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <div class="admin-logo">
+                    <div class="logo-icon">🪵</div>
+                    <h1>پنل مدیریت هنر تنه</h1>
+                </div>
+                <div class="admin-actions">
+                    <button id="logoutBtn" class="btn btn-secondary">خروج</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="admin-layout">
+                <!-- Sidebar Navigation -->
+                <aside class="admin-sidebar">
+                    <nav class="sidebar-nav">
+                        <div class="nav-section">
+                            <h3 class="nav-section-title">داشبورد</h3>
+                            <ul class="nav-list">
+                                <li class="nav-item">
+                                    <a href="/" class="nav-link" data-section="home">
+                                        <span class="nav-icon">🏠</span>
+                                        <span class="nav-text">بازگشت به سایت</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="nav-section">
+                            <h3 class="nav-section-title">محصولات</h3>
+                            <ul class="nav-list">
+                                <li class="nav-item">
+                                    <a href="#products" class="nav-link" data-section="products">
+                                        <span class="nav-icon">📦</span>
+                                        <span class="nav-text">مدیریت محصولات</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#add-product" class="nav-link" data-section="add-product">
+                                        <span class="nav-icon">➕</span>
+                                        <span class="nav-text">افزودن محصول</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="nav-section">
+                            <h3 class="nav-section-title">تنظیمات</h3>
+                            <ul class="nav-list">
+                                <li class="nav-item">
+                                    <a href="#site-settings" class="nav-link" data-section="site-settings">
+                                        <span class="nav-icon">⚙️</span>
+                                        <span class="nav-text">تنظیمات سایت</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#contact-info" class="nav-link" data-section="contact-info">
+                                        <span class="nav-icon">📞</span>
+                                        <span class="nav-text">اطلاعات تماس</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#about-us" class="nav-link" data-section="about-us">
+                                        <span class="nav-icon">ℹ️</span>
+                                        <span class="nav-text">درباره ما</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="nav-section">
+                            <h3 class="nav-section-title">ابزارها</h3>
+                            <ul class="nav-list">
+                                <li class="nav-item">
+                                    <a href="#backup" class="nav-link" data-section="backup">
+                                        <span class="nav-icon">💾</span>
+                                        <span class="nav-text">پشتیبان‌گیری</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#help" class="nav-link" data-section="help">
+                                        <span class="nav-icon">❓</span>
+                                        <span class="nav-text">راهنما</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="admin-content">
+                    <!-- Dashboard Section -->
+                    <section id="dashboard-section" class="content-section active">
+                        <div class="section-header">
+                            <h2>نمای کلی</h2>
+                            <div class="quick-actions">
+                                <button id="quickAddProduct" class="btn btn-primary">
+                                    <span>➕</span>
+                                    افزودن سریع محصول
+                                </button>
+                                <button id="quickSettings" class="btn btn-secondary">
+                                    <span>⚙️</span>
+                                    تنظیمات سریع
+                                </button>
+                            </div>
+                        </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-content">
+                            <h3 id="totalProducts">0</h3>
+                            <p>تعداد محصولات</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <h3 id="activeProducts">0</h3>
+                            <p>محصولات فعال</p>
+                        </div>
+                    </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">📊</div>
+                                <div class="stat-content">
+                                    <h3 id="inactiveProducts">0</h3>
+                                    <p>محصولات غیرفعال</p>
+                        </div>
+                    </div>
+                </div>
+
+                        <!-- Recent Activity -->
+                <div class="management-section">
+                            <div class="section-header">
+                                <h3>فعالیت‌های اخیر</h3>
+                            </div>
+                            <div class="activity-list" id="activityList">
+                                <div class="activity-item">
+                                    <div class="activity-icon">📦</div>
+                                    <div class="activity-content">
+                                        <p>خوش آمدید به پنل مدیریت هنر تنه</p>
+                                        <small>سیستم آماده استفاده است</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Products Management Section -->
+                    <section id="products-section" class="content-section">
+                    <div class="section-header">
+                        <h2>مدیریت محصولات</h2>
+                            <div class="section-actions">
+                        <button id="addProductBtn" class="btn btn-primary">
+                            <span>+</span>
+                            افزودن محصول جدید
+                        </button>
+                                <button id="exportProductsBtn" class="btn btn-secondary">
+                                    <span>📤</span>
+                                    خروجی گرفتن
+                                </button>
+                            </div>
+                    </div>
+
+                    <!-- Products List -->
+                    <div class="products-list" id="productsList">
+                        <!-- Products will be loaded here -->
+                    </div>
+                    </section>
+
+                    <!-- Add Product Section -->
+                    <section id="add-product-section" class="content-section">
+                        <div class="section-header">
+                            <h2>افزودن محصول جدید</h2>
+                        </div>
+                        <div class="add-product-form">
+                            <p class="section-description">برای افزودن محصول جدید، روی دکمه زیر کلیک کنید:</p>
+                            <button id="addProductBtnAlt" class="btn btn-primary btn-large">
+                                <span>➕</span>
+                                افزودن محصول جدید
+                            </button>
+                </div>
+                    </section>
+
+                    <!-- Site Settings Section -->
+                    <section id="site-settings-section" class="content-section">
+                    <div class="section-header">
+                            <h2>تنظیمات کلی سایت</h2>
+                        </div>
+                        <div class="settings-grid">
+                            <div class="settings-card">
+                                <h3>اطلاعات تماس</h3>
+                                <p>مدیریت شماره تماس و لینک‌های شبکه‌های اجتماعی</p>
+                                <a href="#contact-info" class="btn btn-secondary nav-link" data-section="contact-info">
+                                    مدیریت اطلاعات تماس
+                                </a>
+                            </div>
+                            <div class="settings-card">
+                                <h3>درباره ما</h3>
+                                <p>ویرایش متن‌های بخش درباره ما</p>
+                                <a href="#about-us" class="btn btn-secondary nav-link" data-section="about-us">
+                                    ویرایش درباره ما
+                                </a>
+                            </div>
+                    </div>
+                    </section>
+
+                    <!-- Contact Info Section -->
+                    <section id="contact-info-section" class="content-section">
+                        <div class="section-header">
+                            <h2>اطلاعات تماس</h2>
+                        </div>
+                        <form id="contactForm" class="product-form">
+                        <div class="form-group">
+                            <label for="settingsPhone">شماره تماس (برای واتساپ و تماس):</label>
+                            <input type="text" id="settingsPhone" name="phone" placeholder="مثال: 989217907398" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="settingsInstagram">نام کاربری اینستاگرام:</label>
+                            <input type="text" id="settingsInstagram" name="instagram" placeholder="مثال: woodview_atilier" required>
+                        </div>
+
+                            <div class="form-actions">
+                                <button type="button" id="resetContactBtn" class="btn btn-secondary">بازنشانی پیش‌فرض</button>
+                                <button type="submit" class="btn btn-primary">ذخیره اطلاعات تماس</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- About Us Section -->
+                    <section id="about-us-section" class="content-section">
+                        <div class="section-header">
+                            <h2>درباره ما</h2>
+                        </div>
+                        <form id="aboutForm" class="product-form">
+                        <div class="form-group">
+                            <label for="about1">درباره ما - متن 1:</label>
+                                <textarea id="about1" name="about1" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="about2">درباره ما - متن 2:</label>
+                                <textarea id="about2" name="about2" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="about3">درباره ما - متن 3:</label>
+                                <textarea id="about3" name="about3" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="about4">درباره ما - متن 4:</label>
+                                <textarea id="about4" name="about4" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                                <button type="button" id="resetAboutBtn" class="btn btn-secondary">بازنشانی پیش‌فرض</button>
+                                <button type="submit" class="btn btn-primary">ذخیره درباره ما</button>
+                        </div>
+                    </form>
+                    </section>
+
+                    <!-- Backup Section -->
+                    <section id="backup-section" class="content-section">
+                        <div class="section-header">
+                            <h2>پشتیبان‌گیری و بازیابی</h2>
+                        </div>
+                        <div class="backup-actions">
+                            <div class="backup-card">
+                                <h3>📤 خروجی گرفتن</h3>
+                                <p>تمام محصولات و تنظیمات را به صورت فایل JSON ذخیره کنید</p>
+                                <button id="exportAllBtn" class="btn btn-primary">
+                                    <span>💾</span>
+                                    دانلود پشتیبان
+                                </button>
+                            </div>
+                            <div class="backup-card">
+                                <h3>📥 بازیابی</h3>
+                                <p>فایل پشتیبان را انتخاب کنید تا داده‌ها بازیابی شوند</p>
+                                <input type="file" id="importFile" accept=".json" style="display: none;">
+                                <button id="importBtn" class="btn btn-secondary">
+                                    <span>📁</span>
+                                    انتخاب فایل
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Help Section -->
+                    <section id="help-section" class="content-section">
+                        <div class="section-header">
+                            <h2>راهنما و پشتیبانی</h2>
+                        </div>
+                        <div class="help-content">
+                            <div class="help-card">
+                                <h3>📖 راهنمای استفاده</h3>
+                                <ul>
+                                    <li>برای افزودن محصول جدید، از بخش "محصولات" استفاده کنید</li>
+                                    <li>تنظیمات تماس و درباره ما را در بخش "تنظیمات" ویرایش کنید</li>
+                                    <li>برای پشتیبان‌گیری از داده‌ها، از بخش "ابزارها" استفاده کنید</li>
+                                </ul>
+                            </div>
+                            <div class="help-card">
+                                <h3>🔧 نکات مهم</h3>
+                                <ul>
+                                    <li>همیشه قبل از تغییرات مهم، پشتیبان تهیه کنید</li>
+                                    <li>تصاویر محصولات باید کمتر از 5 مگابایت باشند</li>
+                                    <li>برای خروج از پنل، از دکمه "خروج" در بالای صفحه استفاده کنید</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="productModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">افزودن محصول جدید</h3>
+                <button id="closeModal" class="close-btn">&times;</button>
+            </div>
+            
+            <form id="productForm" class="product-form">
+                <input type="hidden" id="productId" name="id">
+                
+                <div class="form-group">
+                    <label for="productTitle">عنوان محصول:</label>
+                    <input type="text" id="productTitle" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productDescription">توضیحات:</label>
+                    <textarea id="productDescription" name="description" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productPrice">قیمت:</label>
+                    <input type="text" id="productPrice" name="price" placeholder="مثال: تماس بگیرید">
+                </div>
+                
+                <div class="form-group">
+                    <label for="productImage">تصویر محصول:</label>
+                    <div class="image-upload-container">
+                        <input type="file" id="productImageFile" name="imageFile" accept="image/*" style="display: none;">
+                        <div class="image-upload-area" id="imageUploadArea">
+                            <div class="upload-placeholder" id="uploadPlaceholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7,10 12,15 17,10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <p>برای انتخاب تصویر کلیک کنید</p>
+                                <small>فرمت‌های پشتیبانی شده: JPG, PNG, WebP</small>
+                            </div>
+                            <div class="image-preview" id="imagePreview" style="display: none;">
+                                <img id="previewImg" src="" alt="پیش‌نمایش">
+                                <button type="button" class="remove-image" id="removeImage">×</button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="productImage" name="image" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productActive">وضعیت:</label>
+                    <select id="productActive" name="active">
+                        <option value="true">فعال</option>
+                        <option value="false">غیرفعال</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">انصراف</button>
+                    <button type="submit" class="btn btn-primary">ذخیره</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>حذف محصول</h3>
+                <button id="closeDeleteModal" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="delete-content">
+                <p>آیا مطمئن هستید که می‌خواهید این محصول را حذف کنید؟</p>
+                <p class="product-name" id="deleteProductName"></p>
+                <div class="form-actions">
+                    <button type="button" id="cancelDeleteBtn" class="btn btn-secondary">انصراف</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">حذف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>

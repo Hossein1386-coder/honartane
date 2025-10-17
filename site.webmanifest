@@ -1,0 +1,42 @@
+{
+    "name": "هنر تنه - محصولات چوبی دست‌ساز",
+    "short_name": "هنر تنه",
+    "description": "تولید و فروش محصولات چوبی دست‌ساز و منحصر به فرد. سفارش اختصاصی با بیش از ۱۰ سال تجربه در یزد",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#171717",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "fa",
+    "dir": "rtl",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable any"
+        }
+    ],
+    "categories": ["shopping", "business", "lifestyle"],
+    "screenshots": [
+        {
+            "src": "/screenshot-mobile.png",
+            "sizes": "390x844",
+            "type": "image/png",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshot-desktop.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ]
+}

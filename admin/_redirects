@@ -1,0 +1,8 @@
+# Netlify redirects for admin panel
+# This ensures proper routing for single-page applications
+
+# Redirect all admin routes to index.html
+/admin/* /admin/index.html 200
+
+# Fallback for any other admin routes
+/admin /admin/index.html 200
