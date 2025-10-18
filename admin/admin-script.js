@@ -733,16 +733,16 @@ function processImageFile(file) {
         showNotification('لطفاً فقط فایل‌های تصویری انتخاب کنید!', 'error');
         return;
     }
-    
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        showNotification('حجم فایل نباید بیشتر از 5 مگابایت باشد!', 'error');
+
+    // Validate file size (max 30MB)
+    if (file.size > 30 * 1024 * 1024) {
+        showNotification('حجم فایل نباید بیشتر از 30 مگابایت باشد!', 'error');
         return;
     }
-    
+
     // Show loading
     imageUploadArea.classList.add('loading');
-    
+
     // Convert to base64
     const reader = new FileReader();
     reader.onload = function(e) {
