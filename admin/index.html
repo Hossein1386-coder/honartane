@@ -61,6 +61,13 @@
                     <h1>پنل مدیریت هنر تنه</h1>
                 </div>
                 <div class="admin-actions">
+                    <button id="mobileMenuToggle" class="mobile-menu-toggle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
                     <button id="logoutBtn" class="btn btn-secondary">خروج</button>
                 </div>
             </div>
@@ -121,6 +128,18 @@
                                     <a href="#about-us" class="nav-link" data-section="about-us">
                                         <span class="nav-icon">ℹ️</span>
                                         <span class="nav-text">درباره ما</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="nav-section">
+                            <h3 class="nav-section-title">امنیت</h3>
+                            <ul class="nav-list">
+                                <li class="nav-item">
+                                    <a href="#change-password" class="nav-link" data-section="change-password">
+                                        <span class="nav-icon">🔐</span>
+                                        <span class="nav-text">تغییر رمز عبور</span>
                                     </a>
                                 </li>
                             </ul>
@@ -344,6 +363,38 @@
                         </div>
                     </section>
 
+                    <!-- Change Password Section -->
+                    <section id="change-password-section" class="content-section">
+                        <div class="section-header">
+                            <h2>تغییر رمز عبور</h2>
+                            <p class="section-description">برای امنیت بیشتر، رمز عبور خود را به‌روزرسانی کنید</p>
+                        </div>
+                        <div class="password-change-form">
+                            <form id="passwordChangeForm" class="product-form">
+                                <div class="form-group">
+                                    <label for="currentPassword">رمز عبور فعلی:</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="newPassword">رمز عبور جدید:</label>
+                                    <input type="password" id="newPassword" name="newPassword" required minlength="6">
+                                    <small class="form-help">رمز عبور باید حداقل 6 کاراکتر باشد</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="confirmPassword">تأیید رمز عبور جدید:</label>
+                                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" id="cancelPasswordChange" class="btn btn-secondary">انصراف</button>
+                                    <button type="submit" class="btn btn-primary">تغییر رمز عبور</button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+
                     <!-- Help Section -->
                     <section id="help-section" class="content-section">
                         <div class="section-header">
@@ -356,6 +407,7 @@
                                     <li>برای افزودن محصول جدید، از بخش "محصولات" استفاده کنید</li>
                                     <li>تنظیمات تماس و درباره ما را در بخش "تنظیمات" ویرایش کنید</li>
                                     <li>برای پشتیبان‌گیری از داده‌ها، از بخش "ابزارها" استفاده کنید</li>
+                                    <li>برای تغییر رمز عبور، از بخش "امنیت" استفاده کنید</li>
                                 </ul>
                             </div>
                             <div class="help-card">
@@ -363,6 +415,7 @@
                                 <ul>
                                     <li>همیشه قبل از تغییرات مهم، پشتیبان تهیه کنید</li>
                                     <li>تصاویر محصولات باید کمتر از 5 مگابایت باشند</li>
+                                    <li>رمز عبور جدید را در جای امن نگهداری کنید</li>
                                     <li>برای خروج از پنل، از دکمه "خروج" در بالای صفحه استفاده کنید</li>
                                 </ul>
                             </div>
@@ -371,6 +424,107 @@
                 </div>
             </div>
         </main>
+        
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileSidebarOverlay" class="mobile-sidebar-overlay"></div>
+        
+        <!-- Mobile Sidebar -->
+        <div id="mobileSidebar" class="mobile-sidebar">
+            <div class="mobile-sidebar-header">
+                <div class="mobile-sidebar-title">منو</div>
+                <button id="mobileSidebarClose" class="mobile-sidebar-close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3 class="nav-section-title">داشبورد</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="/" class="nav-link" data-section="home">
+                                <span class="nav-icon">🏠</span>
+                                <span class="nav-text">بازگشت به سایت</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">محصولات</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="#products" class="nav-link" data-section="products">
+                                <span class="nav-icon">📦</span>
+                                <span class="nav-text">مدیریت محصولات</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#add-product" class="nav-link" data-section="add-product">
+                                <span class="nav-icon">➕</span>
+                                <span class="nav-text">افزودن محصول</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">تنظیمات</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="#site-settings" class="nav-link" data-section="site-settings">
+                                <span class="nav-icon">⚙️</span>
+                                <span class="nav-text">تنظیمات سایت</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#contact-info" class="nav-link" data-section="contact-info">
+                                <span class="nav-icon">📞</span>
+                                <span class="nav-text">اطلاعات تماس</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#about-us" class="nav-link" data-section="about-us">
+                                <span class="nav-icon">ℹ️</span>
+                                <span class="nav-text">درباره ما</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">امنیت</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="#change-password" class="nav-link" data-section="change-password">
+                                <span class="nav-icon">🔐</span>
+                                <span class="nav-text">تغییر رمز عبور</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">ابزارها</h3>
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a href="#backup" class="nav-link" data-section="backup">
+                                <span class="nav-icon">💾</span>
+                                <span class="nav-text">پشتیبان‌گیری</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#help" class="nav-link" data-section="help">
+                                <span class="nav-icon">❓</span>
+                                <span class="nav-text">راهنما</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
     </div>
 
     <!-- Add/Edit Product Modal -->

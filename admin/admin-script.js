@@ -1,9 +1,10 @@
 // Admin Panel JavaScript
 
 // Configuration
-const ADMIN_PASSWORD = "admin123"; // تغییر این رمز عبور را فراموش نکنید
+const ADMIN_PASSWORD = "admin1234"; // تغییر این رمز عبور را فراموش نکنید
 const PRODUCTS_STORAGE_KEY = "honartaneh_products";
 const ADMIN_SESSION_KEY = "admin_session";
+const ADMIN_PASSWORD_KEY = "admin_password";
 
 // DOM Elements
 const loginScreen = document.getElementById('loginScreen');
@@ -24,6 +25,12 @@ const cancelBtn = document.getElementById('cancelBtn');
 const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
+// Mobile Menu Elements
+const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+const mobileSidebar = document.getElementById('mobileSidebar');
+const mobileSidebarOverlay = document.getElementById('mobileSidebarOverlay');
+const mobileSidebarClose = document.getElementById('mobileSidebarClose');
+
 // Navigation Elements
 const navLinks = document.querySelectorAll('.nav-link');
 const contentSections = document.querySelectorAll('.content-section');
@@ -43,6 +50,13 @@ const about3 = document.getElementById('about3');
 const about4 = document.getElementById('about4');
 const resetContactBtn = document.getElementById('resetContactBtn');
 const resetAboutBtn = document.getElementById('resetAboutBtn');
+
+// Password Change Elements
+const passwordChangeForm = document.getElementById('passwordChangeForm');
+const currentPassword = document.getElementById('currentPassword');
+const newPassword = document.getElementById('newPassword');
+const confirmPassword = document.getElementById('confirmPassword');
+const cancelPasswordChange = document.getElementById('cancelPasswordChange');
 
 // Backup Elements
 const exportAllBtn = document.getElementById('exportAllBtn');
@@ -77,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadSettings();
         checkAdminSession();
         setupEventListeners();
+        setupMobileMenu();
         
         // Hide loading screen
         loadingScreen.style.opacity = '0';
@@ -170,6 +185,12 @@ function setupEventListeners() {
     if (exportProductsBtn) exportProductsBtn.addEventListener('click', exportProducts);
     if (importBtn) importBtn.addEventListener('click', () => importFile.click());
     if (importFile) importFile.addEventListener('change', importAllData);
+    
+    // Password change functionality
+    if (passwordChangeForm) passwordChangeForm.addEventListener('submit', handlePasswordChange);
+    if (cancelPasswordChange) cancelPasswordChange.addEventListener('click', cancelPasswordChangeForm);
+    if (newPassword) newPassword.addEventListener('input', checkPasswordStrength);
+    if (confirmPassword) confirmPassword.addEventListener('input', checkPasswordMatch);
     
     // Close modals on outside click
     productModal.addEventListener('click', (e) => {
@@ -323,7 +344,10 @@ function handleLogin(e) {
     e.preventDefault();
     const password = document.getElementById('password').value;
     
-    if (password === ADMIN_PASSWORD) {
+    // Get stored password or use default
+    const storedPassword = localStorage.getItem(ADMIN_PASSWORD_KEY) || ADMIN_PASSWORD;
+    
+    if (password === storedPassword) {
         localStorage.setItem(ADMIN_SESSION_KEY, 'true');
         showDashboard();
         loginError.classList.add('hidden');
@@ -838,6 +862,225 @@ function closeProductModal() {
     removeSelectedImage();
     currentProductId = null;
 }
+
+// Mobile Menu Functions
+function setupMobileMenu() {
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', toggleMobileSidebar);
+    }
+    
+    if (mobileSidebarClose) {
+        mobileSidebarClose.addEventListener('click', closeMobileSidebar);
+    }
+    
+    if (mobileSidebarOverlay) {
+        mobileSidebarOverlay.addEventListener('click', closeMobileSidebar);
+    }
+    
+    // Close mobile sidebar when clicking on nav links
+    const mobileNavLinks = mobileSidebar ? mobileSidebar.querySelectorAll('.nav-link') : [];
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMobileSidebar);
+    });
+}
+
+function toggleMobileSidebar() {
+    if (mobileSidebar && mobileSidebarOverlay) {
+        mobileSidebar.classList.toggle('active');
+        mobileSidebarOverlay.classList.toggle('active');
+        
+        // Prevent body scroll when sidebar is open
+        if (mobileSidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    }
+}
+
+function closeMobileSidebar() {
+    if (mobileSidebar && mobileSidebarOverlay) {
+        mobileSidebar.classList.remove('active');
+        mobileSidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// Password Change Functions
+function handlePasswordChange(e) {
+    e.preventDefault();
+    
+    const currentPass = currentPassword.value;
+    const newPass = newPassword.value;
+    const confirmPass = confirmPassword.value;
+    
+    // Get stored password or use default
+    const storedPassword = localStorage.getItem(ADMIN_PASSWORD_KEY) || ADMIN_PASSWORD;
+    
+    // Validate current password
+    if (currentPass !== storedPassword) {
+        showNotification('رمز عبور فعلی اشتباه است!', 'error');
+        return;
+    }
+    
+    // Validate new password
+    if (newPass.length < 6) {
+        showNotification('رمز عبور جدید باید حداقل 6 کاراکتر باشد!', 'error');
+        return;
+    }
+    
+    // Validate password match
+    if (newPass !== confirmPass) {
+        showNotification('رمز عبور جدید و تأیید آن مطابقت ندارند!', 'error');
+        return;
+    }
+    
+    // Save new password
+    localStorage.setItem(ADMIN_PASSWORD_KEY, newPass);
+    
+    // Clear form
+    passwordChangeForm.reset();
+    
+    // Show success message
+    showNotification('رمز عبور با موفقیت تغییر یافت!', 'success');
+    
+    // Go back to dashboard
+    showSection('dashboard');
+}
+
+function cancelPasswordChangeForm() {
+    passwordChangeForm.reset();
+    showSection('dashboard');
+}
+
+function checkPasswordStrength() {
+    const password = newPassword.value;
+    const strengthIndicator = document.getElementById('passwordStrength') || createPasswordStrengthIndicator();
+    
+    if (password.length === 0) {
+        strengthIndicator.textContent = '';
+        strengthIndicator.className = 'password-strength';
+        return;
+    }
+    
+    let strength = 0;
+    let strengthText = '';
+    let strengthClass = '';
+    
+    if (password.length >= 6) strength++;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    if (strength < 3) {
+        strengthText = 'ضعیف';
+        strengthClass = 'weak';
+    } else if (strength < 5) {
+        strengthText = 'متوسط';
+        strengthClass = 'medium';
+    } else {
+        strengthText = 'قوی';
+        strengthClass = 'strong';
+    }
+    
+    strengthIndicator.textContent = `قدرت رمز: ${strengthText}`;
+    strengthIndicator.className = `password-strength ${strengthClass}`;
+}
+
+function checkPasswordMatch() {
+    const newPass = newPassword.value;
+    const confirmPass = confirmPassword.value;
+    const matchIndicator = document.getElementById('passwordMatch') || createPasswordMatchIndicator();
+    
+    if (confirmPass.length === 0) {
+        matchIndicator.textContent = '';
+        matchIndicator.className = 'password-match';
+        return;
+    }
+    
+    if (newPass === confirmPass) {
+        matchIndicator.textContent = '✓ رمز عبور مطابقت دارد';
+        matchIndicator.className = 'password-match match';
+    } else {
+        matchIndicator.textContent = '✗ رمز عبور مطابقت ندارد';
+        matchIndicator.className = 'password-match no-match';
+    }
+}
+
+function createPasswordStrengthIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'passwordStrength';
+    indicator.className = 'password-strength';
+    newPassword.parentNode.appendChild(indicator);
+    return indicator;
+}
+
+function createPasswordMatchIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'passwordMatch';
+    indicator.className = 'password-match';
+    confirmPassword.parentNode.appendChild(indicator);
+    return indicator;
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Style the notification
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        animation: slideInRight 0.3s ease;
+        max-width: 300px;
+    `;
+    
+    // Set background color based on type
+    if (type === 'success') {
+        notification.style.backgroundColor = '#28a745';
+    } else if (type === 'error') {
+        notification.style.backgroundColor = '#dc3545';
+    } else {
+        notification.style.backgroundColor = '#17a2b8';
+    }
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
 
 // Make functions globally available
 window.editProduct = editProduct;
