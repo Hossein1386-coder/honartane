@@ -1,9 +1,15 @@
 // Products Data - Load from localStorage or use default
 let products = [];
+let blogPosts = [];
 
 // Load products from localStorage or use default data
 function loadProducts() {
-    const stored = localStorage.getItem('products');
+    // Try admin panel storage key first, then fallback to old key
+    let stored = localStorage.getItem('honartaneh_products');
+    if (!stored) {
+        stored = localStorage.getItem('products');
+    }
+    
     if (stored) {
         try {
             products = JSON.parse(stored);
@@ -17,6 +23,55 @@ function loadProducts() {
     
     // Filter only active products for display
     return products.filter(product => product.active !== false);
+}
+
+// Load blog posts from localStorage
+function loadBlogPosts() {
+    let stored = localStorage.getItem('honartaneh_blog_posts');
+    
+    if (stored) {
+        try {
+            blogPosts = JSON.parse(stored);
+        } catch (error) {
+            console.error('Error loading blog posts from localStorage:', error);
+            blogPosts = getDefaultBlogPosts();
+        }
+    } else {
+        blogPosts = getDefaultBlogPosts();
+    }
+    
+    // Filter only published posts
+    return blogPosts.filter(post => post.status === 'published');
+}
+
+// Get default blog posts
+function getDefaultBlogPosts() {
+    return [
+        {
+            id: '1',
+            title: 'راهنمای انتخاب بهترین چوب برای خانه',
+            category: 'راهنمای خرید',
+            excerpt: 'انتخاب نوع چوب مناسب برای خانه یکی از مهم‌ترین تصمیمات در دکوراسیون است.',
+            content: 'انتخاب نوع چوب مناسب برای خانه یکی از مهم‌ترین تصمیمات در دکوراسیون است. در این مقاله به شما کمک می‌کنیم تا بهترین نوع چوب را برای هر قسمت از خانه انتخاب کنید.',
+            image: 'images/blog-1.jpg',
+            keywords: 'چوب، انتخاب چوب، دکوراسیون',
+            status: 'published',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        },
+        {
+            id: '2',
+            title: 'نگهداری و مراقبت از محصولات چوبی',
+            category: 'نگهداری',
+            excerpt: 'محصولات چوبی با مراقبت مناسب می‌توانند سال‌ها زیبا و مقاوم بمانند.',
+            content: 'محصولات چوبی با مراقبت مناسب می‌توانند سال‌ها زیبا و مقاوم بمانند. در این راهنما، روش‌های صحیح نگهداری از میز چوبی، قفسه چوبی و سایر محصولات چوبی را به شما آموزش می‌دهیم.',
+            image: 'images/blog-2.jpg',
+            keywords: 'نگهداری چوب، مراقبت چوبی',
+            status: 'published',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        }
+    ];
 }
 
 // Default products data

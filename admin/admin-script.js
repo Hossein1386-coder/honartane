@@ -3,6 +3,7 @@
 // Configuration
 const ADMIN_PASSWORD = "admin1234"; // تغییر این رمز عبور را فراموش نکنید
 const PRODUCTS_STORAGE_KEY = "honartaneh_products";
+const BLOG_POSTS_STORAGE_KEY = "honartaneh_blog_posts";
 const ADMIN_SESSION_KEY = "admin_session";
 const ADMIN_PASSWORD_KEY = "admin_password";
 
@@ -76,7 +77,10 @@ const productImage = document.getElementById('productImage');
 // State
 let currentProductId = null;
 let products = [];
+let blogPosts = [];
+let currentBlogId = null;
 let deleteProductId = null;
+let deleteBlogId = null;
 let siteSettings = null;
 
 // Initialize
@@ -86,18 +90,34 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Simulate loading time
     setTimeout(() => {
-        // Load data first to avoid empty UI after refresh
-        loadProducts();
-        loadSettings();
-        checkAdminSession();
-        setupEventListeners();
-        setupMobileMenu();
-        
-        // Hide loading screen
-        loadingScreen.style.opacity = '0';
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-        }, 300);
+        try {
+            // Load data first to avoid empty UI after refresh
+            loadProducts();
+            loadBlogPosts();
+            loadSettings();
+            checkAdminSession();
+            setupEventListeners();
+            setupMobileMenu();
+            setupBlogEventListeners();
+            
+            // Update displays after loading
+            updateProductsDisplay();
+            updateBlogPostsDisplay();
+            
+            // Hide loading screen
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }
+        } catch (error) {
+            console.error('Error during initialization:', error);
+            // Hide loading screen even if there's an error
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+            }
+        }
     }, 1500); // 1.5 second loading time
 });
 
@@ -124,12 +144,12 @@ function showDashboard() {
         loadProducts();
     }
     loginScreen.classList.add('hidden');
-    adminDashboard.classList.add('hidden');
-    setTimeout(() => {
-        adminDashboard.classList.remove('hidden');
-    }, 100);
+    adminDashboard.classList.remove('hidden');
     updateStats();
     renderProducts();
+    
+    // Show dashboard section by default
+    showSection('dashboard');
 }
 
 // Setup event listeners
@@ -153,6 +173,15 @@ function setupEventListeners() {
         openProductModal();
     });
     if (quickSettings) quickSettings.addEventListener('click', () => showSection('site-settings'));
+    
+    // Blog management buttons
+    const addBlogBtn = document.getElementById('addBlogBtn');
+    const addBlogBtnAlt = document.getElementById('addBlogBtnAlt');
+    const exportBlogBtn = document.getElementById('exportBlogBtn');
+    
+    if (addBlogBtn) addBlogBtn.addEventListener('click', showAddBlogModal);
+    if (addBlogBtnAlt) addBlogBtnAlt.addEventListener('click', showAddBlogModal);
+    if (exportBlogBtn) exportBlogBtn.addEventListener('click', () => exportBlogPosts());
     
     // Modal controls
     closeModal.addEventListener('click', closeProductModal);
@@ -238,6 +267,9 @@ function showSection(sectionName) {
     
     // Update page title
     updatePageTitle(sectionName);
+    
+    // Close mobile sidebar if open
+    closeMobileSidebar();
 }
 
 function updatePageTitle(sectionName) {
@@ -245,9 +277,12 @@ function updatePageTitle(sectionName) {
         'dashboard': 'نمای کلی',
         'products': 'مدیریت محصولات',
         'add-product': 'افزودن محصول',
+        'blog-posts': 'مدیریت مقالات',
+        'add-blog': 'نوشتن مقاله جدید',
         'site-settings': 'تنظیمات سایت',
         'contact-info': 'اطلاعات تماس',
         'about-us': 'درباره ما',
+        'change-password': 'تغییر رمز عبور',
         'backup': 'پشتیبان‌گیری',
         'help': 'راهنما'
     };
@@ -386,6 +421,222 @@ function loadProducts() {
         products = getDefaultProducts();
         saveProducts();
     }
+}
+
+// Load blog posts from localStorage
+function loadBlogPosts() {
+    let stored = localStorage.getItem(BLOG_POSTS_STORAGE_KEY);
+    
+    if (!stored) {
+        stored = sessionStorage.getItem(BLOG_POSTS_STORAGE_KEY);
+    }
+    
+    if (stored) {
+        try {
+            blogPosts = JSON.parse(stored);
+        } catch (error) {
+            console.error('Error parsing blog posts data:', error);
+            blogPosts = getDefaultBlogPosts();
+            saveBlogPosts();
+        }
+    } else {
+        // Initialize with default blog posts if none exist
+        blogPosts = getDefaultBlogPosts();
+        saveBlogPosts();
+    }
+}
+
+// Get default blog posts
+function getDefaultBlogPosts() {
+    return [
+        {
+            id: '1',
+            title: 'راهنمای انتخاب بهترین چوب برای خانه',
+            category: 'راهنمای خرید',
+            excerpt: 'انتخاب نوع چوب مناسب برای خانه یکی از مهم‌ترین تصمیمات در دکوراسیون است.',
+            content: 'انتخاب نوع چوب مناسب برای خانه یکی از مهم‌ترین تصمیمات در دکوراسیون است. در این مقاله به شما کمک می‌کنیم تا بهترین نوع چوب را برای هر قسمت از خانه انتخاب کنید.',
+            image: 'images/blog-1.jpg',
+            keywords: 'چوب، انتخاب چوب، دکوراسیون',
+            status: 'published',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        },
+        {
+            id: '2',
+            title: 'نگهداری و مراقبت از محصولات چوبی',
+            category: 'نگهداری',
+            excerpt: 'محصولات چوبی با مراقبت مناسب می‌توانند سال‌ها زیبا و مقاوم بمانند.',
+            content: 'محصولات چوبی با مراقبت مناسب می‌توانند سال‌ها زیبا و مقاوم بمانند. در این راهنما، روش‌های صحیح نگهداری از میز چوبی، قفسه چوبی و سایر محصولات چوبی را به شما آموزش می‌دهیم.',
+            image: 'images/blog-2.jpg',
+            keywords: 'نگهداری چوب، مراقبت چوبی',
+            status: 'published',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        }
+    ];
+}
+
+// Save blog posts to localStorage
+function saveBlogPosts() {
+    try {
+        localStorage.setItem(BLOG_POSTS_STORAGE_KEY, JSON.stringify(blogPosts));
+        sessionStorage.setItem(BLOG_POSTS_STORAGE_KEY, JSON.stringify(blogPosts));
+    } catch (error) {
+        console.error('Error saving blog posts:', error);
+    }
+}
+
+// Update products display
+function updateProductsDisplay() {
+    updateStats();
+    renderProducts();
+}
+
+// Update blog posts display
+function updateBlogPostsDisplay() {
+    const blogPostsList = document.getElementById('blogPostsList');
+    if (!blogPostsList) return;
+    
+    if (blogPosts.length === 0) {
+        blogPostsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>هیچ مقاله‌ای وجود ندارد</h3>
+                <p>برای شروع، اولین مقاله خود را بنویسید</p>
+                <button class="btn btn-primary" onclick="showAddBlogModal()">
+                    <span>✍️</span>
+                    نوشتن مقاله جدید
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    blogPostsList.innerHTML = blogPosts.map(post => `
+        <div class="blog-post-card">
+            <div class="blog-post-header">
+                <h3 class="blog-post-title">${post.title}</h3>
+                <div class="blog-post-actions">
+                    <button class="btn btn-secondary" onclick="editBlogPost('${post.id}')">
+                        <span>✏️</span>
+                        ویرایش
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteBlogPost('${post.id}')">
+                        <span>🗑️</span>
+                        حذف
+                    </button>
+                </div>
+            </div>
+            <div class="blog-post-meta">
+                <span class="blog-post-category">${post.category}</span>
+                <span class="blog-post-status ${post.status}">${post.status === 'published' ? 'منتشر شده' : 'پیش‌نویس'}</span>
+                <span class="blog-post-date">${new Date(post.createdAt).toLocaleDateString('fa-IR')}</span>
+            </div>
+            <p class="blog-post-excerpt">${post.excerpt}</p>
+        </div>
+    `).join('');
+}
+
+// Blog management functions
+function showAddBlogModal() {
+    currentBlogId = null;
+    document.getElementById('blogModalTitle').textContent = 'نوشتن مقاله جدید';
+    document.getElementById('blogForm').reset();
+    document.getElementById('blogImage').value = '';
+    document.getElementById('blogImagePreview').style.display = 'none';
+    document.getElementById('blogUploadPlaceholder').style.display = 'block';
+    showModal('blogModal');
+}
+
+function editBlogPost(id) {
+    const post = blogPosts.find(p => p.id === id);
+    if (!post) return;
+    
+    currentBlogId = id;
+    document.getElementById('blogModalTitle').textContent = 'ویرایش مقاله';
+    document.getElementById('blogId').value = post.id;
+    document.getElementById('blogTitle').value = post.title;
+    document.getElementById('blogCategory').value = post.category;
+    document.getElementById('blogExcerpt').value = post.excerpt;
+    document.getElementById('blogContent').value = post.content;
+    document.getElementById('blogKeywords').value = post.keywords;
+    document.getElementById('blogStatus').value = post.status;
+    document.getElementById('blogImage').value = post.image;
+    
+    if (post.image) {
+        document.getElementById('blogPreviewImg').src = post.image;
+        document.getElementById('blogImagePreview').style.display = 'block';
+        document.getElementById('blogUploadPlaceholder').style.display = 'none';
+    }
+    
+    showModal('blogModal');
+}
+
+function deleteBlogPost(id) {
+    const post = blogPosts.find(p => p.id === id);
+    if (!post) return;
+    
+    deleteBlogId = id;
+    document.getElementById('deleteBlogName').textContent = post.title;
+    showModal('deleteBlogModal');
+}
+
+function confirmDeleteBlog() {
+    if (!deleteBlogId) return;
+    
+    blogPosts = blogPosts.filter(p => p.id !== deleteBlogId);
+    saveBlogPosts();
+    updateBlogPostsDisplay();
+    hideModal('deleteBlogModal');
+    deleteBlogId = null;
+    
+    showNotification('مقاله با موفقیت حذف شد', 'success');
+}
+
+function saveBlogPost(formData) {
+    const postData = {
+        id: currentBlogId || Date.now().toString(),
+        title: formData.get('title'),
+        category: formData.get('category'),
+        excerpt: formData.get('excerpt'),
+        content: formData.get('content'),
+        image: formData.get('image'),
+        keywords: formData.get('keywords'),
+        status: formData.get('status'),
+        createdAt: currentBlogId ? blogPosts.find(p => p.id === currentBlogId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+    
+    if (currentBlogId) {
+        // Update existing post
+        const index = blogPosts.findIndex(p => p.id === currentBlogId);
+        if (index !== -1) {
+            blogPosts[index] = postData;
+        }
+    } else {
+        // Add new post
+        blogPosts.unshift(postData);
+    }
+    
+    saveBlogPosts();
+    updateBlogPostsDisplay();
+    hideModal('blogModal');
+    
+    showNotification(currentBlogId ? 'مقاله با موفقیت ویرایش شد' : 'مقاله جدید با موفقیت اضافه شد', 'success');
+}
+
+// Export blog posts
+function exportBlogPosts() {
+    const dataStr = JSON.stringify(blogPosts, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `blog-posts-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    showNotification('مقالات با موفقیت دانلود شدند', 'success');
 }
 
 // Get default products
@@ -1082,7 +1333,87 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Modal helper functions
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Blog form handling
+function handleBlogSubmit(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    saveBlogPost(formData);
+}
+
+// Setup blog form event listener - moved to main initialization
+function setupBlogEventListeners() {
+    const blogForm = document.getElementById('blogForm');
+    if (blogForm) {
+        blogForm.addEventListener('submit', handleBlogSubmit);
+    }
+    
+    // Blog modal controls
+    const closeBlogModal = document.getElementById('closeBlogModal');
+    const cancelBlogBtn = document.getElementById('cancelBlogBtn');
+    const closeDeleteBlogModal = document.getElementById('closeDeleteBlogModal');
+    const cancelDeleteBlogBtn = document.getElementById('cancelDeleteBlogBtn');
+    const confirmDeleteBlogBtn = document.getElementById('confirmDeleteBlogBtn');
+    
+    if (closeBlogModal) closeBlogModal.addEventListener('click', () => hideModal('blogModal'));
+    if (cancelBlogBtn) cancelBlogBtn.addEventListener('click', () => hideModal('blogModal'));
+    if (closeDeleteBlogModal) closeDeleteBlogModal.addEventListener('click', () => hideModal('deleteBlogModal'));
+    if (cancelDeleteBlogBtn) cancelDeleteBlogBtn.addEventListener('click', () => hideModal('deleteBlogModal'));
+    if (confirmDeleteBlogBtn) confirmDeleteBlogBtn.addEventListener('click', confirmDeleteBlog);
+    
+    // Blog image upload
+    const blogImageFile = document.getElementById('blogImageFile');
+    const blogImageUploadArea = document.getElementById('blogImageUploadArea');
+    const blogUploadPlaceholder = document.getElementById('blogUploadPlaceholder');
+    const blogImagePreview = document.getElementById('blogImagePreview');
+    const blogPreviewImg = document.getElementById('blogPreviewImg');
+    const removeBlogImage = document.getElementById('removeBlogImage');
+    
+    if (blogImageUploadArea && blogImageFile) {
+        blogImageUploadArea.addEventListener('click', () => blogImageFile.click());
+        blogImageFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    blogPreviewImg.src = e.target.result;
+                    blogUploadPlaceholder.style.display = 'none';
+                    blogImagePreview.style.display = 'block';
+                    document.getElementById('blogImage').value = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    if (removeBlogImage) {
+        removeBlogImage.addEventListener('click', () => {
+            blogImageFile.value = '';
+            document.getElementById('blogImage').value = '';
+            blogUploadPlaceholder.style.display = 'block';
+            blogImagePreview.style.display = 'none';
+        });
+    }
+}
+
 // Make functions globally available
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.openProductModal = openProductModal;
+window.showAddBlogModal = showAddBlogModal;
+window.editBlogPost = editBlogPost;
+window.deleteBlogPost = deleteBlogPost;

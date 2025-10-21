@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>هنر تنه - مقالات و راهنمای محصولات چوبی</title>
+        <link>https://honartaneh.ir/blog.html</link>
+        <description>راهنمای کامل محصولات چوبی، نگهداری چوب، انتخاب بهترین چوب برای خانه و دکوراسیون</description>
+        <language>fa-IR</language>
+        <lastBuildDate>Thu, 19 Dec 2024 00:00:00 +0330</lastBuildDate>
+        <atom:link href="https://honartaneh.ir/rss.xml" rel="self" type="application/rss+xml"/>
+        
+        <item>
+            <title>راهنمای انتخاب بهترین چوب برای خانه</title>
+            <link>https://honartaneh.ir/blog.html#choosing-wood</link>
+            <description>انتخاب نوع چوب مناسب برای خانه یکی از مهم‌ترین تصمیمات در دکوراسیون است. در این مقاله به شما کمک می‌کنیم تا بهترین نوع چوب را برای هر قسمت از خانه انتخاب کنید.</description>
+            <pubDate>Thu, 19 Dec 2024 00:00:00 +0330</pubDate>
+            <guid>https://honartaneh.ir/blog.html#choosing-wood</guid>
+        </item>
+        
+        <item>
+            <title>نگهداری و مراقبت از محصولات چوبی</title>
+            <link>https://honartaneh.ir/blog.html#wood-care</link>
+            <description>محصولات چوبی با مراقبت مناسب می‌توانند سال‌ها زیبا و مقاوم بمانند. در این راهنما، روش‌های صحیح نگهداری از میز چوبی، قفسه چوبی و سایر محصولات چوبی را به شما آموزش می‌دهیم.</description>
+            <pubDate>Mon, 15 Dec 2024 00:00:00 +0330</pubDate>
+            <guid>https://honartaneh.ir/blog.html#wood-care</guid>
+        </item>
+        
+        <item>
+            <title>تفاوت چوب طبیعی و چوب مصنوعی</title>
+            <link>https://honartaneh.ir/blog.html#natural-vs-artificial</link>
+            <description>آیا می‌دانید تفاوت بین چوب طبیعی و چوب مصنوعی چیست؟ در این مقاله، مزایا و معایب هر کدام را بررسی کرده و به شما کمک می‌کنیم تا بهترین انتخاب را داشته باشید.</description>
+            <pubDate>Sat, 10 Dec 2024 00:00:00 +0330</pubDate>
+            <guid>https://honartaneh.ir/blog.html#natural-vs-artificial</guid>
+        </item>
+        
+        <item>
+            <title>تاریخچه هنر چوب‌کاری در ایران</title>
+            <link>https://honartaneh.ir/blog.html#woodworking-history</link>
+            <description>هنر چوب‌کاری در ایران قدمتی هزاران ساله دارد. از منبت‌کاری اصفهان تا معرق‌کاری یزد، هر منطقه سبک خاص خود را دارد.</description>
+            <pubDate>Thu, 05 Dec 2024 00:00:00 +0330</pubDate>
+            <guid>https://honartaneh.ir/blog.html#woodworking-history</guid>
+        </item>
+        
+        <item>
+            <title>طراحی دکوراسیون با محصولات چوبی</title>
+            <link>https://honartaneh.ir/blog.html#wood-decoration</link>
+            <description>محصولات چوبی می‌توانند فضای خانه را گرم و دنج کنند. در این راهنما، ایده‌های مختلف برای استفاده از محصولات چوبی در دکوراسیون خانه را ارائه می‌دهیم.</description>
+            <pubDate>Sun, 01 Dec 2024 00:00:00 +0330</pubDate>
+            <guid>https://honartaneh.ir/blog.html#wood-decoration</guid>
+        </item>
+    </channel>
+</rss>
