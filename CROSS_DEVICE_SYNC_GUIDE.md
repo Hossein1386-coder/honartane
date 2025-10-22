@@ -28,7 +28,7 @@
 
 ```javascript
 // GitHub API configuration
-const GITHUB_TOKEN = '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'; // توکن خود را اینجا قرار دهید
+const GITHUB_TOKEN='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'; // توکن خود را اینجا قرار دهید
 const GITHUB_REPO = 'UpShopco-Ir/honartaneh';
 const GITHUB_FILE_PATH = 'data/products.json';
 
