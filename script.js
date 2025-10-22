@@ -25,6 +25,234 @@ function loadProducts() {
     return products.filter(product => product.active !== false);
 }
 
+// Real-time synchronization system
+class RealTimeSync {
+    constructor() {
+        this.setupStorageListener();
+        this.setupPeriodicSync();
+        this.setupGitHubSync();
+        this.lastSyncTime = localStorage.getItem('lastSyncTime') || 0;
+        this.githubLastSync = localStorage.getItem('githubLastSync') || 0;
+    }
+
+    // Listen for localStorage changes from admin panel
+    setupStorageListener() {
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'honartaneh_products' || e.key === 'products') {
+                console.log('🔄 محصولات به‌روزرسانی شدند - همگام‌سازی...');
+                this.syncProducts();
+            }
+            if (e.key === 'honartaneh_settings_v1') {
+                console.log('⚙️ تنظیمات به‌روزرسانی شدند - همگام‌سازی...');
+                this.syncSettings();
+            }
+        });
+    }
+
+    // Periodic sync every 30 seconds as backup
+    setupPeriodicSync() {
+        setInterval(() => {
+            this.checkForUpdates();
+        }, 30000); // 30 seconds
+    }
+
+    // GitHub API sync for cross-device synchronization
+    setupGitHubSync() {
+        // Check for updates from GitHub every 2 minutes
+        setInterval(() => {
+            this.syncFromGitHub();
+        }, 120000); // 2 minutes
+        
+        // Initial sync after 5 seconds
+        setTimeout(() => {
+            this.syncFromGitHub();
+        }, 5000);
+    }
+
+    // Sync products from GitHub
+    async syncFromGitHub() {
+        try {
+            const response = await fetch('https://raw.githubusercontent.com/UpShopco-Ir/honartaneh/main/data/products.json');
+            if (!response.ok) throw new Error('Failed to fetch from GitHub');
+            
+            const githubProducts = await response.json();
+            const currentProducts = loadProducts();
+            
+            // Check if GitHub data is newer
+            const githubDataHash = this.hashProducts(githubProducts);
+            const currentDataHash = this.hashProducts(currentProducts);
+            
+            if (githubDataHash !== currentDataHash) {
+                console.log('🔄 محصولات جدید از GitHub دریافت شد');
+                
+                // Update localStorage with GitHub data
+                localStorage.setItem('honartaneh_products', JSON.stringify(githubProducts));
+                localStorage.setItem('products', JSON.stringify(githubProducts));
+                localStorage.setItem('githubLastSync', Date.now().toString());
+                
+                // Refresh displays
+                this.syncProducts();
+                
+                // Show notification
+                this.showSyncNotification('محصولات جدید دریافت شد از سرور ☁️');
+            }
+        } catch (error) {
+            console.log('⚠️ خطا در همگام‌سازی با GitHub:', error.message);
+        }
+    }
+
+    // Create hash for products comparison
+    hashProducts(products) {
+        return JSON.stringify(products.map(p => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            price: p.price,
+            image: p.image,
+            active: p.active
+        })));
+    }
+
+    // Check for updates by comparing timestamps
+    checkForUpdates() {
+        const currentSyncTime = localStorage.getItem('lastSyncTime');
+        if (currentSyncTime && currentSyncTime !== this.lastSyncTime) {
+            console.log('🔄 تغییرات جدید شناسایی شد - همگام‌سازی...');
+            this.syncProducts();
+            this.syncSettings();
+            this.lastSyncTime = currentSyncTime;
+        }
+    }
+
+    // Sync products and refresh display
+    syncProducts() {
+        const newProducts = loadProducts();
+        if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
+            products = newProducts;
+            
+            // Refresh product displays
+            if (typeof renderProducts === 'function') {
+                renderProducts();
+            }
+            if (typeof renderProductSlider === 'function') {
+                renderProductSlider();
+            }
+            if (typeof renderCatalog === 'function') {
+                renderCatalog(products);
+            }
+            
+            // Show notification
+            this.showSyncNotification('محصولات به‌روزرسانی شدند ✨');
+        }
+    }
+
+    // Sync settings and refresh display
+    syncSettings() {
+        const newSettings = getSiteSettings();
+        if (JSON.stringify(newSettings) !== JSON.stringify(__SETTINGS__)) {
+            // Update global settings
+            Object.assign(__SETTINGS__, newSettings);
+            
+            // Refresh settings-dependent elements
+            this.updateSettingsElements();
+            
+            // Show notification
+            this.showSyncNotification('تنظیمات به‌روزرسانی شدند ⚙️');
+        }
+    }
+
+    // Update settings-dependent elements
+    updateSettingsElements() {
+        const settings = __SETTINGS__;
+        
+        // Update phone links
+        try {
+            const telLink = document.querySelector('a[href^="tel:"]');
+            if (telLink) {
+                telLink.href = `tel:+${settings.phone}`;
+                telLink.textContent = `+${settings.phone}`;
+            }
+            
+            const footerPhone = document.querySelector('.footer-contact-item span[dir="ltr"]');
+            if (footerPhone) {
+                footerPhone.textContent = settings.phone.startsWith('+') ? settings.phone : settings.phone.replace(/^/, '0');
+            }
+            
+            // Update instagram links
+            document.querySelectorAll('a[href*="instagram.com"]').forEach(a => {
+                a.href = `https://instagram.com/${settings.instagram}`;
+                if (a.classList.contains('contact-link')) {
+                    a.textContent = settings.instagram;
+                }
+            });
+            
+            // Update about texts if present
+            const aboutParas = document.querySelectorAll('.about-story .about-text');
+            if (settings.about && aboutParas.length > 0) {
+                aboutParas.forEach((p, idx) => {
+                    if (settings.about[idx]) {
+                        p.textContent = settings.about[idx];
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error updating settings elements:', error);
+        }
+    }
+
+    // Show sync notification
+    showSyncNotification(message) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'sync-notification';
+        notification.innerHTML = `
+            <div class="sync-notification-content">
+                <span class="sync-icon">🔄</span>
+                <span class="sync-message">${message}</span>
+            </div>
+        `;
+        
+        // Style the notification
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            font-size: 14px;
+            font-weight: 500;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Remove after 4 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 4000);
+    }
+}
+
+// Initialize real-time sync
+let realTimeSync;
+
 // Load blog posts from localStorage
 function loadBlogPosts() {
     let stored = localStorage.getItem('honartaneh_blog_posts');
@@ -336,6 +564,32 @@ document.addEventListener('DOMContentLoaded', () => {
             if (settings.about[idx]) p.textContent = settings.about[idx];
         });
     } catch {}
+    
+    // Initialize real-time sync system
+    realTimeSync = new RealTimeSync();
+    
+    // Listen for custom events from admin panel (same tab)
+    window.addEventListener('productsUpdated', (e) => {
+        console.log('🔄 محصولات در همان تب به‌روزرسانی شدند');
+        realTimeSync.syncProducts();
+    });
+    
+    window.addEventListener('settingsUpdated', (e) => {
+        console.log('⚙️ تنظیمات در همان تب به‌روزرسانی شدند');
+        realTimeSync.syncSettings();
+    });
+    
+    window.addEventListener('blogPostsUpdated', (e) => {
+        console.log('📝 مقالات در همان تب به‌روزرسانی شدند');
+        // Refresh blog posts if on blog page
+        if (typeof loadBlogPosts === 'function') {
+            blogPosts = loadBlogPosts();
+            // Trigger blog refresh if function exists
+            if (typeof renderBlogPosts === 'function') {
+                renderBlogPosts();
+            }
+        }
+    });
 });
 
 

@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "title": "میز چوبی",
+    "description": "طراحی مینیمال با چوب گردو طبیعی",
+    "price": "تماس بگیرید",
+    "image": "images/55.jpg",
+    "active": true
+  },
+  {
+    "id": 2,
+    "title": "استند چوبی موبایل",
+    "description": "ساخته شده با دقت، مقاوم و زیبا",
+    "price": "تماس بگیرید",
+    "image": "images/2.jpg",
+    "active": true
+  },
+  {
+    "id": 3,
+    "title": "برد مزه",
+    "description": "سادگی و کارایی در یک طراحی",
+    "price": "تماس بگیرید",
+    "image": "images/3.jpg",
+    "active": true
+  },
+  {
+    "id": 4,
+    "title": "ساعت چوبی",
+    "description": "تراش داده شده با دست، برای دکور",
+    "price": "تماس بگیرید",
+    "image": "images/58.jpg",
+    "active": true
+  },
+  {
+    "id": 5,
+    "title": "برد مزه با چوب سنجد",
+    "description": "طراحی مدرن با چوب راش",
+    "price": "تماس بگیرید",
+    "image": "images/5.jpg",
+    "active": true
+  },
+  {
+    "id": 6,
+    "title": "میز گیمینگ با چوب سنجد",
+    "description": "مجموعه کامل با پرداخت طبیعی",
+    "price": "تماس بگیرید",
+    "image": "images/table.jpg",
+    "active": true
+  }
+]

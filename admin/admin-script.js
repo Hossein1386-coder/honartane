@@ -325,6 +325,14 @@ function loadSettings() {
 function saveSettings() {
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(siteSettings));
     sessionStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(siteSettings));
+    
+    // Update sync timestamp for real-time sync
+    localStorage.setItem('lastSyncTime', Date.now().toString());
+    
+    // Trigger custom event for immediate sync (same tab)
+    window.dispatchEvent(new CustomEvent('settingsUpdated', {
+        detail: { settings: siteSettings }
+    }));
 }
 
 function handleContactSubmit(e) {
@@ -481,6 +489,14 @@ function saveBlogPosts() {
     try {
         localStorage.setItem(BLOG_POSTS_STORAGE_KEY, JSON.stringify(blogPosts));
         sessionStorage.setItem(BLOG_POSTS_STORAGE_KEY, JSON.stringify(blogPosts));
+        
+        // Update sync timestamp for real-time sync
+        localStorage.setItem('lastSyncTime', Date.now().toString());
+        
+        // Trigger custom event for immediate sync (same tab)
+        window.dispatchEvent(new CustomEvent('blogPostsUpdated', {
+            detail: { blogPosts: blogPosts }
+        }));
     } catch (error) {
         console.error('Error saving blog posts:', error);
     }
@@ -693,7 +709,7 @@ function getDefaultProducts() {
     ];
 }
 
-// Save products to localStorage
+// Save products to localStorage and GitHub
 function saveProducts() {
     localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
     // Also save to main site's localStorage for immediate sync
@@ -701,6 +717,45 @@ function saveProducts() {
     
     // Save to sessionStorage as backup
     sessionStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+    
+    // Update sync timestamp for real-time sync
+    localStorage.setItem('lastSyncTime', Date.now().toString());
+    
+    // Trigger custom event for immediate sync (same tab)
+    window.dispatchEvent(new CustomEvent('productsUpdated', {
+        detail: { products: products }
+    }));
+    
+    // Save to GitHub (async, don't wait for it)
+    saveToGitHub();
+}
+
+// Save products to GitHub via GitHub API
+async function saveToGitHub() {
+    try {
+        // Note: This requires GitHub Personal Access Token
+        // For now, we'll just log that we would save to GitHub
+        console.log('💾 محصولات برای ارسال به GitHub آماده شدند');
+        console.log('📝 برای فعال‌سازی همگام‌سازی کامل، GitHub Token نیاز است');
+        
+        // TODO: Implement GitHub API call with Personal Access Token
+        // const token = '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';
+        // const response = await fetch('https://api.github.com/repos/UpShopco-Ir/honartaneh/contents/data/products.json', {
+        //     method: 'PUT',
+        //     headers: {
+        //         'Authorization': `token ${token}`,
+        //         'Content-Type': 'application/json'
+        //     },
+        //     body: JSON.stringify({
+        //         message: 'Update products from admin panel',
+        //         content: btoa(JSON.stringify(products, null, 2)),
+        //         sha: 'current_sha' // Need to get current file SHA first
+        //     })
+        // });
+        
+    } catch (error) {
+        console.error('❌ خطا در ارسال به GitHub:', error);
+    }
 }
 
 // Update statistics
