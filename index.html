@@ -207,15 +207,149 @@
     <section class="custom-order-section">
         <div class="container">
             <div class="custom-order-content">
-                <h2 class="section-title">سفارش اختصاصی</h2>
-                <p class="custom-order-description">ایده خاصی دارید؟ عکس محصول مورد نظر را برای ما ارسال کنید تا آن را برایتان بسازیم.</p>
-                <button class="btn btn-primary" onclick="openWhatsApp('سلام، می‌خواهم محصول سفارشی طراحی کنم. لطفا راهنمایی‌ام کنید.')">
-                    <span>ارسال طرح</span>
+                <div class="custom-order-icon">✨</div>
+                <h2 class="section-title">سفارش اختصاصی به سلیقه شما</h2>
+                <p class="custom-order-description">
+                    <strong>همه محصولات ما به سلیقه و ابعاد دلخواه شما ساخته می‌شوند!</strong>
+                </p>
+                <div class="custom-order-features">
+                    <div class="custom-feature-item">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <span>ابعاد و سایز دلخواه شما</span>
+                    </div>
+                    <div class="custom-feature-item">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <span>طراحی و رنگبندی سفارشی</span>
+                    </div>
+                    <div class="custom-feature-item">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <span>انتخاب نوع چوب مورد نظر</span>
+                    </div>
+                </div>
+                <p class="custom-order-note">
+                    ایده خاصی دارید؟ عکس یا طرح محصول مورد نظر را برای ما ارسال کنید. ما آن را دقیقاً مطابق سلیقه و ابعاد دلخواه شما می‌سازیم.
+                </p>
+                <button class="btn btn-primary" onclick="openWhatsApp('سلام، می‌خواهم محصول سفارشی با ابعاد و سایز دلخواه خودم سفارش دهم. لطفا راهنمایی‌ام کنید.')">
+                    <span>سفارش محصول اختصاصی</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                     </svg>
                 </button>
             </div>
+        </div>
+    </section>
+
+    <!-- Video Shorts Section -->
+    <section id="stories" class="stories-section" dir="rtl">
+        <div class="container">
+          <div class="stories-header">
+            <h3>پست‌ها</h3>
+          </div>
+      
+          <div class="story-wrapper">
+            <button type="button" class="stories-prev" aria-label="بعدی" onclick="scrollStories(1)">‹</button>
+      
+            <div id="storiesTrack" class="story-list">
+              <a href="#" class="story-card" role="listitem"
+                 data-src="media/video1.MP4" data-type="video" data-poster="images/Cover.png"
+                 onclick="openStoryFromEl(this); return false;">
+                <div class="story-play">▶</div>
+                <video src="media/video1.MP4" poster="images/Cover.png" muted playsinline preload="metadata"></video>
+                <div class="story-title"></div>
+              </a>
+      
+              <a href="#" class="story-card" role="listitem"
+                 data-src="media/video2.MP4" data-type="video" data-poster="images/Cover.png"
+                 onclick="openStoryFromEl(this); return false;">
+                <div class="story-play">▶</div>
+                <video src="media/video2.MP4" poster="images/Cover.png" muted playsinline preload="metadata"></video>
+                <div class="story-title"></div>
+              </a>
+
+              <!-- ویدیو شما - مسیر فایل ویدیو را اینجا قرار دهید -->
+              <a href="#" class="story-card" role="listitem"
+                 data-src="media/video3.MP4" data-type="video" data-poster="images/Cover.png"
+                 onclick="openStoryFromEl(this); return false;">
+                <div class="story-play">▶</div>
+                <video src="media/video3.MP4" poster="images/Cover.png" muted playsinline preload="metadata"></video>
+                <div class="story-title"></div>
+              </a>
+
+              <a href="#" class="story-card" role="listitem"
+                 data-src="media/video4.MP4" data-type="video" data-poster="images/Cover.png"
+                 onclick="openStoryFromEl(this); return false;">
+                <div class="story-play">▶</div>
+                <video src="media/video4.MP4" poster="images/Cover.png" muted playsinline preload="metadata"></video>
+                <div class="story-title"></div>
+              </a>
+
+              <a href="#" class="story-card" role="listitem"
+                 data-src="media/video5.mp4" data-type="video" data-poster="images/Cover.png"
+                 onclick="openStoryFromEl(this); return false;">
+                 <div class="story-play">▶</div>
+                 <video src="media/video5.mp4" poster="images/Cover.png" muted playsinline preload="metadata"></video>
+                 <div class="story-title"></div>
+               </a>
+
+               <a href="#" class="story-card" role="listitem"
+                 data-src="media/video6.mp4" data-type="video" data-poster="images/Cover.png"
+                 onclick="openStoryFromEl(this); return false;">
+                 <div class="story-play">▶</div>
+                 <video src="media/video6.mp4" poster="images/Cover.png" muted playsinline preload="metadata"></video>
+                 <div class="story-title"></div>
+               </a>
+
+               <a href="#" class="story-card" role="listitem"
+                 data-src="media/video7.mp4" data-type="video" data-poster="images/Cover.png"
+                 onclick="openStoryFromEl(this); return false;">
+                 <div class="story-play">▶</div>
+                 <video src="media/video7.mp4" poster="images/Cover.png" muted playsinline preload="metadata"></video>
+                 <div class="story-title"></div>
+               </a>
+
+               <a href="#" class="story-card" role="listitem"
+                 data-src="media/video8.mp4" data-type="video" data-poster="images/Cover.png"
+                 onclick="openStoryFromEl(this); return false;">
+                 <div class="story-play">▶</div>
+                 <video src="media/video8.mp4" poster="images/Cover.png" muted playsinline preload="metadata"></video>
+                 <div class="story-title"></div>
+               </a>
+
+
+            </div>
+      
+            <button type="button" class="stories-next" aria-label="قبلی" onclick="scrollStories(-1)">›</button>
+          </div>
+      
+          <!-- Modal viewer -->
+          <div id="storyModal" class="story-modal hidden" onclick="overlayClose(event)">
+            <div class="viewer" onclick="event.stopPropagation()">
+              <div class="story-progress" id="storyProgress"></div>
+      
+              <img id="storyImage" class="story-media hidden" alt="story image" />
+              <div id="storySpinner" class="spinner hidden">
+                <div class="spinner-ring"></div>
+              </div>
+      
+              <video id="storyVideo" class="story-media hidden" playsinline controls preload="auto">
+                <source id="storySource" />
+              </video>
+      
+              <div class="tap tap-left" onclick="prevStory()" aria-hidden="true"></div>
+              <div class="tap tap-right" onclick="nextStory()" aria-hidden="true"></div>
+      
+              <button type="button" class="close-btn" aria-label="بستن" onclick="closeStoryModal()">✕</button>
+            </div>
+          </div>
         </div>
     </section>
 
@@ -228,9 +362,9 @@
                 <div class="about-story">
                     <p class="about-text">در هنرتنه، ما باور داریم هر تکه چوب، روحی از دل طبیعت در خود دارد.</p>
                     <p class="about-text">ما با عشق، دقت و مهارت، این روح را به زندگی برمی‌گردانیم و آن را به اثری دست‌ساز و منحصربه‌فرد تبدیل می‌کنیم.</p>
-                    <p class="about-text">بیشتر کارهای ما سفارشی و اختصاصی هستند — یعنی دقیقاً همان چیزی را می‌سازیم که شما در ذهن دارید.</p>
-                    <p class="about-text">از انتخاب طرح و نوع چوب گرفته تا جزئیات نهایی، هر مرحله با عشق و سلیقه‌ی شما همراه است.</p>
-                    <p class="about-text">محصولات چوبی ما شامل میز چوبی، قفسه چوبی، برد مزه، ساعت چوبی و انواع مبلمان چوبی می‌شود که همگی با چوب طبیعی و دست‌ساز تولید می‌شوند.</p>
+                    <p class="about-text"><strong>همه محصولات ما به سلیقه و ابعاد دلخواه شما ساخته می‌شوند!</strong> یعنی دقیقاً همان چیزی را می‌سازیم که شما در ذهن دارید — با ابعاد، سایز و طراحی که خودتان انتخاب می‌کنید.</p>
+                    <p class="about-text">از انتخاب طرح و نوع چوب گرفته تا ابعاد دقیق و جزئیات نهایی، هر مرحله با عشق و سلیقه‌ی شما همراه است. ما محصولات را مطابق فضای شما و نیازهای خاصتان طراحی و می‌سازیم.</p>
+                    <p class="about-text">محصولات چوبی ما شامل میز چوبی (عسلی، اداری، غذاخوری)، قفسه چوبی، برد مزه، ساعت چوبی، استند و انواع مبلمان چوبی می‌شود که همگی با چوب طبیعی و دست‌ساز تولید می‌شوند.</p>
                 </div>
                                 <!-- mobile menu elements moved below header to avoid stacking context issues -->
                 <div class="about-tagline">

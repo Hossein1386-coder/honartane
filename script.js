@@ -2,22 +2,17 @@
 let products = [];
 let blogPosts = [];
 
-// Load products from localStorage or use default data
-function loadProducts() {
-    // Try admin panel storage key first, then fallback to old key
-    let stored = localStorage.getItem('honartaneh_products');
-    if (!stored) {
-        stored = localStorage.getItem('products');
-    }
-    
-    if (stored) {
-        try {
-            products = JSON.parse(stored);
-        } catch (error) {
-            console.error('Error loading products from localStorage:', error);
+// Load products from JSON file
+async function loadProducts() {
+    try {
+        const response = await fetch('data/products.json');
+        if (response.ok) {
+            products = await response.json();
+        } else {
             products = getDefaultProducts();
         }
-    } else {
+    } catch (error) {
+        console.error('Error loading products:', error);
         products = getDefaultProducts();
     }
     
@@ -25,246 +20,17 @@ function loadProducts() {
     return products.filter(product => product.active !== false);
 }
 
-// Real-time synchronization system
-class RealTimeSync {
-    constructor() {
-        this.setupStorageListener();
-        this.setupPeriodicSync();
-        this.setupGitHubSync();
-        this.lastSyncTime = localStorage.getItem('lastSyncTime') || 0;
-        this.githubLastSync = localStorage.getItem('githubLastSync') || 0;
-    }
-
-    // Listen for localStorage changes from admin panel
-    setupStorageListener() {
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'honartaneh_products' || e.key === 'products') {
-                console.log('🔄 محصولات به‌روزرسانی شدند - همگام‌سازی...');
-                this.syncProducts();
-            }
-            if (e.key === 'honartaneh_settings_v1') {
-                console.log('⚙️ تنظیمات به‌روزرسانی شدند - همگام‌سازی...');
-                this.syncSettings();
-            }
-        });
-    }
-
-    // Periodic sync every 30 seconds as backup
-    setupPeriodicSync() {
-        setInterval(() => {
-            this.checkForUpdates();
-        }, 30000); // 30 seconds
-    }
-
-    // GitHub API sync for cross-device synchronization
-    setupGitHubSync() {
-        // Check for updates from GitHub every 2 minutes
-        setInterval(() => {
-            this.syncFromGitHub();
-        }, 120000); // 2 minutes
-        
-        // Initial sync after 5 seconds
-        setTimeout(() => {
-            this.syncFromGitHub();
-        }, 5000);
-    }
-
-    // Sync products from GitHub
-    async syncFromGitHub() {
-        try {
-            const response = await fetch('https://raw.githubusercontent.com/UpShopco-Ir/honartaneh/main/data/products.json');
-            if (!response.ok) throw new Error('Failed to fetch from GitHub');
-            
-            const githubProducts = await response.json();
-            const currentProducts = loadProducts();
-            
-            // Check if GitHub data is newer
-            const githubDataHash = this.hashProducts(githubProducts);
-            const currentDataHash = this.hashProducts(currentProducts);
-            
-            if (githubDataHash !== currentDataHash) {
-                console.log('🔄 محصولات جدید از GitHub دریافت شد');
-                
-                // Update localStorage with GitHub data
-                localStorage.setItem('honartaneh_products', JSON.stringify(githubProducts));
-                localStorage.setItem('products', JSON.stringify(githubProducts));
-                localStorage.setItem('githubLastSync', Date.now().toString());
-                
-                // Refresh displays
-                this.syncProducts();
-                
-                // Show notification
-                this.showSyncNotification('محصولات جدید دریافت شد از سرور ☁️');
-            }
-        } catch (error) {
-            console.log('⚠️ خطا در همگام‌سازی با GitHub:', error.message);
-        }
-    }
-
-    // Create hash for products comparison
-    hashProducts(products) {
-        return JSON.stringify(products.map(p => ({
-            id: p.id,
-            title: p.title,
-            description: p.description,
-            price: p.price,
-            image: p.image,
-            active: p.active
-        })));
-    }
-
-    // Check for updates by comparing timestamps
-    checkForUpdates() {
-        const currentSyncTime = localStorage.getItem('lastSyncTime');
-        if (currentSyncTime && currentSyncTime !== this.lastSyncTime) {
-            console.log('🔄 تغییرات جدید شناسایی شد - همگام‌سازی...');
-            this.syncProducts();
-            this.syncSettings();
-            this.lastSyncTime = currentSyncTime;
-        }
-    }
-
-    // Sync products and refresh display
-    syncProducts() {
-        const newProducts = loadProducts();
-        if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
-            products = newProducts;
-            
-            // Refresh product displays
-            if (typeof renderProducts === 'function') {
-                renderProducts();
-            }
-            if (typeof renderProductSlider === 'function') {
-                renderProductSlider();
-            }
-            if (typeof renderCatalog === 'function') {
-                renderCatalog(products);
-            }
-            
-            // Show notification
-            this.showSyncNotification('محصولات به‌روزرسانی شدند ✨');
-        }
-    }
-
-    // Sync settings and refresh display
-    syncSettings() {
-        const newSettings = getSiteSettings();
-        if (JSON.stringify(newSettings) !== JSON.stringify(__SETTINGS__)) {
-            // Update global settings
-            Object.assign(__SETTINGS__, newSettings);
-            
-            // Refresh settings-dependent elements
-            this.updateSettingsElements();
-            
-            // Show notification
-            this.showSyncNotification('تنظیمات به‌روزرسانی شدند ⚙️');
-        }
-    }
-
-    // Update settings-dependent elements
-    updateSettingsElements() {
-        const settings = __SETTINGS__;
-        
-        // Update phone links
-        try {
-            const telLink = document.querySelector('a[href^="tel:"]');
-            if (telLink) {
-                telLink.href = `tel:+${settings.phone}`;
-                telLink.textContent = `+${settings.phone}`;
-            }
-            
-            const footerPhone = document.querySelector('.footer-contact-item span[dir="ltr"]');
-            if (footerPhone) {
-                footerPhone.textContent = settings.phone.startsWith('+') ? settings.phone : settings.phone.replace(/^/, '0');
-            }
-            
-            // Update instagram links
-            document.querySelectorAll('a[href*="instagram.com"]').forEach(a => {
-                a.href = `https://instagram.com/${settings.instagram}`;
-                if (a.classList.contains('contact-link')) {
-                    a.textContent = settings.instagram;
-                }
-            });
-            
-            // Update about texts if present
-            const aboutParas = document.querySelectorAll('.about-story .about-text');
-            if (settings.about && aboutParas.length > 0) {
-                aboutParas.forEach((p, idx) => {
-                    if (settings.about[idx]) {
-                        p.textContent = settings.about[idx];
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Error updating settings elements:', error);
-        }
-    }
-
-    // Show sync notification
-    showSyncNotification(message) {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = 'sync-notification';
-        notification.innerHTML = `
-            <div class="sync-notification-content">
-                <span class="sync-icon">🔄</span>
-                <span class="sync-message">${message}</span>
-            </div>
-        `;
-        
-        // Style the notification
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 10000;
-            font-size: 14px;
-            font-weight: 500;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            max-width: 300px;
-        `;
-        
-        // Add to page
-        document.body.appendChild(notification);
-        
-        // Animate in
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-        
-        // Remove after 4 seconds
-        setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, 4000);
-    }
-}
-
-// Initialize real-time sync
-let realTimeSync;
-
-// Load blog posts from localStorage
-function loadBlogPosts() {
-    let stored = localStorage.getItem('honartaneh_blog_posts');
-    
-    if (stored) {
-        try {
-            blogPosts = JSON.parse(stored);
-        } catch (error) {
-            console.error('Error loading blog posts from localStorage:', error);
+// Load blog posts
+async function loadBlogPosts() {
+    try {
+        const response = await fetch('data/blog-posts.json');
+        if (response.ok) {
+            blogPosts = await response.json();
+        } else {
             blogPosts = getDefaultBlogPosts();
         }
-    } else {
+    } catch (error) {
+        console.error('Error loading blog posts:', error);
         blogPosts = getDefaultBlogPosts();
     }
     
@@ -356,13 +122,8 @@ function getDefaultProducts() {
     ];
 }
 
-// Settings (loaded from localStorage if present)
-const SETTINGS_STORAGE_KEY = 'honartaneh_settings_v1';
+// Settings
 function getSiteSettings() {
-    try {
-        const raw = localStorage.getItem(SETTINGS_STORAGE_KEY) || sessionStorage.getItem(SETTINGS_STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
-    } catch {}
     return {
         phone: "989217907398",
         instagram: "woodview_atilier"
@@ -387,9 +148,9 @@ function openWhatsApp(message, productTitle = null) {
 }
 
 // Render Products
-function renderProducts() {
+async function renderProducts() {
     const productsGrid = document.getElementById('productsGrid');
-    const activeProducts = loadProducts();
+    const activeProducts = await loadProducts();
     
     // Clear existing products
     productsGrid.innerHTML = '';
@@ -431,8 +192,8 @@ function renderProducts() {
 }
 
 // Render product slider (top picks)
-function renderProductSlider() {
-    const activeProducts = loadProducts();
+async function renderProductSlider() {
+    const activeProducts = await loadProducts();
     const sliderTrack = document.getElementById('sliderTrack');
     const sliderDots = document.getElementById('sliderDots');
     if (!sliderTrack) return;
@@ -565,29 +326,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     } catch {}
     
-    // Initialize real-time sync system
-    realTimeSync = new RealTimeSync();
-    
-    // Listen for custom events from admin panel (same tab)
-    window.addEventListener('productsUpdated', (e) => {
-        console.log('🔄 محصولات در همان تب به‌روزرسانی شدند');
-        realTimeSync.syncProducts();
-    });
-    
-    window.addEventListener('settingsUpdated', (e) => {
-        console.log('⚙️ تنظیمات در همان تب به‌روزرسانی شدند');
-        realTimeSync.syncSettings();
-    });
-    
-    window.addEventListener('blogPostsUpdated', (e) => {
-        console.log('📝 مقالات در همان تب به‌روزرسانی شدند');
-        // Refresh blog posts if on blog page
-        if (typeof loadBlogPosts === 'function') {
-            blogPosts = loadBlogPosts();
-            // Trigger blog refresh if function exists
-            if (typeof renderBlogPosts === 'function') {
-                renderBlogPosts();
-            }
+    // Load products and render
+    loadProducts().then(() => {
+        if (typeof renderProducts === 'function') {
+            renderProducts();
+        }
+        if (typeof renderProductSlider === 'function') {
+            renderProductSlider();
         }
     });
 });
@@ -669,7 +414,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Render slider on page load (grid may be removed on homepage)
-    renderProductSlider();
+    loadProducts().then(() => {
+        renderProductSlider();
+    });
 
     // Active link highlighting using IntersectionObserver
     const sections = document.querySelectorAll('section[id]');
@@ -704,3 +451,196 @@ document.addEventListener('DOMContentLoaded', function() {
     sections.forEach(section => observer.observe(section));
 });
 
+// Stories viewer logic
+(function () {
+    let lastStoryEl = null;
+  
+    function guessMime(url) {
+      const u = (url || "").toLowerCase();
+      if (u.includes(".mp4")) return "video/mp4";
+      if (u.includes(".webm")) return "video/webm";
+      if (u.includes(".ogg") || u.includes(".ogv")) return "video/ogg";
+      return "";
+    }
+  
+    function buildProgress(single = true) {
+      const host = document.getElementById('storyProgress');
+      if (!host) return null;
+      host.innerHTML = '';
+      const seg = document.createElement('div'); seg.className = 'seg';
+      const fill = document.createElement('div');
+      seg.appendChild(fill);
+      host.appendChild(seg);
+      return fill;
+    }
+  
+    window.openStoryModalWithPoster = function (src, type, poster, el) {
+      lastStoryEl = el || lastStoryEl;
+      const img = document.getElementById('storyImage');
+      const vid = document.getElementById('storyVideo');
+      const source = document.getElementById('storySource');
+      const spinner = document.getElementById('storySpinner');
+  
+      const fill = buildProgress();
+  
+      if (type && type.toLowerCase() === 'video') {
+        img.classList.add('hidden');
+        vid.classList.remove('hidden');
+        spinner.classList.remove('hidden');
+  
+        if (poster) vid.setAttribute('poster', poster); else vid.removeAttribute('poster');
+  
+        if (source) {
+          source.setAttribute('src', src || '');
+          source.setAttribute('type', guessMime(src));
+        }
+        try { vid.load(); } catch (e) { }
+        vid.currentTime = 0;
+  
+        const tryPlay = () => {
+          const p = vid.play();
+          if (p && typeof p.then === 'function') {
+            p.catch(function () { try { vid.muted = true; vid.play(); } catch (e) { } });
+          }
+        };
+  
+        vid.oncanplay = function () { spinner.classList.add('hidden'); tryPlay(); };
+        setTimeout(function () { spinner.classList.add('hidden'); tryPlay(); }, 1200);
+  
+        vid.onended = function () { nextStory(); };
+  
+      } else {
+        // Image path
+        vid.classList.add('hidden');
+        try { vid.pause(); } catch (e) { }
+        img.classList.remove('hidden');
+        img.src = src || '';
+        if (fill) {
+          fill.style.transitionDuration = '4s';
+          setTimeout(() => { fill.style.width = '100%'; }, 50);
+          setTimeout(() => { nextStory(); }, 4100);
+        }
+      }
+  
+      document.getElementById('storyModal').classList.remove('hidden');
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+      return false;
+    };
+  
+    window.openStoryFromEl = function (a) {
+      lastStoryEl = a;
+      const src = a.getAttribute('data-src');
+      const type = a.getAttribute('data-type');
+      const poster = a.getAttribute('data-poster');
+      return openStoryModalWithPoster(src, type, poster, a);
+    };
+  
+    window.nextStory = function () {
+      if (!lastStoryEl) return;
+      let n = lastStoryEl.nextElementSibling;
+      // skip non-elements or text nodes
+      while (n && n.nodeType !== 1) n = n.nextSibling;
+      if (!n) return closeStoryModal();
+      openStoryFromEl(n);
+    };
+  
+    window.prevStory = function () {
+      if (!lastStoryEl) return;
+      let p = lastStoryEl.previousElementSibling;
+      while (p && p.nodeType !== 1) p = p.previousSibling;
+      if (!p) return;
+      openStoryFromEl(p);
+    };
+  
+    window.closeStoryModal = function () {
+      const modal = document.getElementById('storyModal');
+      const vid = document.getElementById('storyVideo');
+      const source = document.getElementById('storySource');
+      try {
+        vid.pause();
+        if (source) { source.removeAttribute('src'); source.removeAttribute('type'); }
+        vid.load();
+      } catch (e) { }
+      modal.classList.add('hidden');
+      // Restore body scroll when modal is closed
+      document.body.style.overflow = '';
+    };
+  
+    window.overlayClose = function (e) {
+      // only close when backdrop clicked
+      if (e.target && e.target.id === 'storyModal') closeStoryModal();
+    };
+  
+    window.scrollStories = function (dir) {
+      const track = document.getElementById('storiesTrack');
+      if (!track) return;
+      const step = 220;
+      // direction: -1 -> left, 1 -> right for RTL feel
+      track.scrollBy({ left: dir * step, behavior: 'smooth' });
+    };
+  
+    // Export small helper to open by index (optional)
+    window.openStoryAt = function (index) {
+      const list = document.querySelectorAll('.story-card');
+      if (!list || !list.length) return;
+      const el = list[index] || list[0];
+      if (el) openStoryFromEl(el);
+    };
+  
+    // small enhancement: keyboard support for modal
+    document.addEventListener('keydown', function (ev) {
+      const modal = document.getElementById('storyModal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      if (ev.key === 'ArrowRight') nextStory();
+      if (ev.key === 'ArrowLeft') prevStory();
+      if (ev.key === 'Escape') closeStoryModal();
+    });
+  
+    // Load first frame of videos to show instead of black screen
+    document.addEventListener('DOMContentLoaded', function() {
+      const storyVideos = document.querySelectorAll('.story-card video');
+      storyVideos.forEach(function(video) {
+        let frameLoaded = false;
+        
+        // Prevent autoplay - ensure video is paused
+        video.pause();
+        video.removeAttribute('autoplay');
+        
+        // Prevent play on any event - only allow in modal
+        video.addEventListener('play', function(e) {
+          // Check if this video is in the modal
+          const modal = document.getElementById('storyModal');
+          const modalVideo = document.getElementById('storyVideo');
+          
+          // Only allow play if this is the modal video
+          if (!modal || modal.classList.contains('hidden') || video !== modalVideo) {
+            e.preventDefault();
+            video.pause();
+            video.currentTime = 0.01;
+          }
+        }, { passive: false });
+        
+        // Load first frame only once
+        function loadFirstFrame() {
+          if (frameLoaded) return;
+          
+          if (video.readyState >= 2) {
+            frameLoaded = true;
+            // Seek to first frame
+            video.currentTime = 0.01;
+            video.pause();
+          }
+        }
+        
+        // Try to load frame when metadata is ready
+        if (video.readyState >= 2) {
+          loadFirstFrame();
+        } else {
+          video.addEventListener('loadedmetadata', loadFirstFrame, { once: true });
+          video.addEventListener('loadeddata', loadFirstFrame, { once: true });
+        }
+      });
+    });
+  
+  })();

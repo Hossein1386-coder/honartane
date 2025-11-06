@@ -45,9 +45,9 @@
         const loadingScreen = document.getElementById('loadingScreen');
         
         // Simulate loading time
-        setTimeout(() => {
+        setTimeout(async () => {
             // Load and render products
-            allProducts = loadProducts();
+            allProducts = await loadProducts();
             renderCatalog(allProducts);
             updateResultsCount(allProducts.length);
 
@@ -78,10 +78,10 @@
     // Real-time sync for products page
     function setupProductsPageSync() {
         // Listen for storage changes
-        window.addEventListener('storage', (e) => {
+        window.addEventListener('storage', async (e) => {
             if (e.key === 'honartaneh_products' || e.key === 'products') {
                 console.log('🔄 محصولات در صفحه products به‌روزرسانی شدند');
-                allProducts = loadProducts();
+                allProducts = await loadProducts();
                 renderCatalog(allProducts);
                 updateResultsCount(allProducts.length);
                 
@@ -91,9 +91,9 @@
         });
         
         // Listen for custom events (same tab)
-        window.addEventListener('productsUpdated', (e) => {
+        window.addEventListener('productsUpdated', async (e) => {
             console.log('🔄 محصولات در همان تب به‌روزرسانی شدند');
-            allProducts = loadProducts();
+            allProducts = await loadProducts();
             renderCatalog(allProducts);
             updateResultsCount(allProducts.length);
         });
@@ -311,9 +311,14 @@
                     <div class="filter-title">فیلترهای سریع</div>
                     <div>
                         <span class="filter-chip" onclick="filterByCategory('میز')">میز</span>
+                        <span class="filter-chip" onclick="filterByCategory('میز عسلی')">میز عسلی</span>
+                        <span class="filter-chip" onclick="filterByCategory('میز غذاخوری')">میز غذاخوری</span>
+                        <span class="filter-chip" onclick="filterByCategory('میز اداری')">میز اداری</span>
                         <span class="filter-chip" onclick="filterByCategory('برد مزه')">برد مزه</span>
                         <span class="filter-chip" onclick="filterByCategory('ساعت')">ساعت</span>
                         <span class="filter-chip" onclick="filterByCategory('استند')">استند</span>
+                        <span class="filter-chip" onclick="filterByCategory('آینه')">آینه</span>
+                        <span class="filter-chip" onclick="filterByCategory('کتابخانه')">کتابخانه</span>
                     </div>
                 </div>
                 <div class="filter-group">
