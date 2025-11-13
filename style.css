@@ -1225,6 +1225,13 @@ img {
   display: block; 
   background: #000000;
 }
+.story-thumbnail {
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+  display: block; 
+  background: #000000;
+}
 .story-card video {
   background: #000000;
 }
@@ -1234,7 +1241,7 @@ img {
 .story-card video::-webkit-media-controls-enclosure {
   display: none !important;
 }
-.story-title { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 12px; font-weight: 800; font-size: 14px; text-shadow: 0 2px 6px rgba(0,0,0,.45); background: linear-gradient(180deg, transparent, rgba(0,0,0,.55)); }
+/* Story title removed - using cover images instead */
 .story-badge { position: absolute; top: 10px; right: 10px; background: #f59e0b; color: #111827; font-weight: 800; font-size: 11px; padding: 4px 8px; border-radius: 999px; }
 
 /* play overlay */
@@ -1292,4 +1299,170 @@ img {
 @media (max-width:640px) {
   .story-card { width: 140px; height: 200px; }
   .stories-prev, .stories-next { display: none; }
+}
+
+/* FAQ Section */
+.faq-section {
+    padding: 5rem 0;
+    background: #f8f9fa;
+}
+
+.faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    background: #fff;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+.faq-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.faq-question {
+    width: 100%;
+    padding: 1.5rem;
+    background: none;
+    border: none;
+    text-align: right;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #171717;
+    transition: color 0.3s ease;
+}
+
+.faq-question:hover {
+    color: #667eea;
+}
+
+.faq-icon {
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-right: 1rem;
+}
+
+.faq-item.active .faq-icon {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 1.5rem;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 500px;
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.faq-answer p {
+    color: #525252;
+    line-height: 1.8;
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .faq-question {
+        font-size: 1rem;
+        padding: 1.25rem;
+    }
+    
+    .faq-answer {
+        padding: 0 1.25rem;
+    }
+    
+    .faq-item.active .faq-answer {
+        padding: 0 1.25rem 1.25rem 1.25rem;
+    }
+}
+
+/* Recent Articles Section */
+.recent-articles-section {
+    padding: 5rem 0;
+    background: #ffffff;
+}
+
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.article-preview-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.article-preview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #667eea;
+}
+
+.article-preview-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #171717;
+    margin-bottom: 1rem;
+}
+
+.article-preview-title a {
+    color: #171717;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.article-preview-title a:hover {
+    color: #667eea;
+}
+
+.article-preview-excerpt {
+    color: #525252;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.article-preview-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.article-preview-link:hover {
+    color: #764ba2;
+    gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .articles-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .article-preview-card {
+        padding: 1.5rem;
+    }
 }

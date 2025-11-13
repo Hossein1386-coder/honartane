@@ -597,50 +597,22 @@ document.addEventListener('DOMContentLoaded', function() {
       if (ev.key === 'Escape') closeStoryModal();
     });
   
-    // Load first frame of videos to show instead of black screen
-    document.addEventListener('DOMContentLoaded', function() {
-      const storyVideos = document.querySelectorAll('.story-card video');
-      storyVideos.forEach(function(video) {
-        let frameLoaded = false;
-        
-        // Prevent autoplay - ensure video is paused
-        video.pause();
-        video.removeAttribute('autoplay');
-        
-        // Prevent play on any event - only allow in modal
-        video.addEventListener('play', function(e) {
-          // Check if this video is in the modal
-          const modal = document.getElementById('storyModal');
-          const modalVideo = document.getElementById('storyVideo');
-          
-          // Only allow play if this is the modal video
-          if (!modal || modal.classList.contains('hidden') || video !== modalVideo) {
-            e.preventDefault();
-            video.pause();
-            video.currentTime = 0.01;
-          }
-        }, { passive: false });
-        
-        // Load first frame only once
-        function loadFirstFrame() {
-          if (frameLoaded) return;
-          
-          if (video.readyState >= 2) {
-            frameLoaded = true;
-            // Seek to first frame
-            video.currentTime = 0.01;
-            video.pause();
-          }
-        }
-        
-        // Try to load frame when metadata is ready
-        if (video.readyState >= 2) {
-          loadFirstFrame();
-        } else {
-          video.addEventListener('loadedmetadata', loadFirstFrame, { once: true });
-          video.addEventListener('loadeddata', loadFirstFrame, { once: true });
-        }
-      });
-    });
-  
+    // Videos are now lazy-loaded only when user clicks
+    // No preloading needed - thumbnails are used instead
   })();
+
+// FAQ Toggle Function
+function toggleFaq(button) {
+    const faqItem = button.closest('.faq-item');
+    const isActive = faqItem.classList.contains('active');
+    
+    // Close all FAQ items
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Open clicked item if it wasn't active
+    if (!isActive) {
+        faqItem.classList.add('active');
+    }
+}
